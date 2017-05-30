@@ -19,7 +19,7 @@ Status: **alpha**.
 (json/to-json {:hello 1})
 ;; => "{\"hello\":1}"
 
-(def +data+ (json/to-json {:foo \"bar\"}))
+(def +data+ (json/to-json {:foo "bar"}))
 (json/from-json +data+)
 ;; => {"foo" "bar"}
 ```

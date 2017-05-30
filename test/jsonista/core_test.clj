@@ -19,6 +19,10 @@
   (is (stays-same? [1 2 3]))
   (is (= "0.75" (json/to-json 3/4))))
 
+(deftest test-nil
+  (is (nil? (json/from-json nil)))
+  (is (= "null" (json/to-json nil))))
+
 (deftest options-tests
   (let [data {:hello "world"}]
     (is (= {"hello" "world"} (-> data json/to-json json/from-json)))

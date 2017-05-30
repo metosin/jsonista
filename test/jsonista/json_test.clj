@@ -1,4 +1,4 @@
-(ns jsonista.json-test
+(ns jsonista.core-test
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as json]
             [cheshire.core :as cheshire]
@@ -22,7 +22,10 @@
 (deftest options-tests
   (let [data {:hello "world"}]
     (is (= {"hello" "world"} (-> data json/to-json json/from-json)))
-    (is (= {:hello "world"} (-> data (json/to-json) (json/from-json +kw-mapper+))))))
+    (is (= {:hello "world"} (-> data (json/to-json) (json/from-json +kw-mapper+))))
+    (is (= "{\n  \"hello\" : \"world\"\n}" (json/to-json data {:pretty true})))
+    (is (= "{\"imperial-money\":\"\\u00A3\"}" (json/to-json {:imperial-money "£"} {:escape-non-ascii true})))
+    (is (= "{\"mmddyyyy\":\"00-01-70\"}" (json/to-json {:mmddyyyy (Date. 0)} {:date-format "mm-dd-yy"})))))
 
 (deftest roundrobin-tests
   (let [data {:numbers {:integer (int 1)

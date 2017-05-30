@@ -1,7 +1,7 @@
 (ns jsonista.json-perf-test
   (:require [criterium.core :as cc]
             [clojure.test :refer :all]
-            [jsonista.test_utils :refer :all]
+            [jsonista.test-utils :refer :all]
             [jsonista.core :as json]
             [cheshire.core :as cheshire])
   (:import com.fasterxml.jackson.databind.ObjectMapper

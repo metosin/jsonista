@@ -1,4 +1,4 @@
-(ns jsonista.test_utils
+(ns jsonista.test-utils
   (:import [java.io ByteArrayInputStream]))
 
 (set! *warn-on-reflection* true)

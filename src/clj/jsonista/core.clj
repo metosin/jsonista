@@ -124,11 +124,12 @@
   ([data] (from-json data +default-mapper+))
   ([data opts-or-mapper]
    (let [mapper (cond
-                  (map? opts-or-mapper) (make-mapper opts-or-mapper)
+                  (map? opts-or-mapper)                   (make-mapper opts-or-mapper)
                   (instance? ObjectMapper opts-or-mapper) opts-or-mapper)]
-     (if (string? data)
-       (.readValue ^ObjectMapper mapper ^String data ^Class Object)
-       (.readValue ^ObjectMapper mapper ^InputStream data ^Class Object)))))
+     (cond
+       (string? data)               (.readValue ^ObjectMapper mapper ^String data ^Class Object)
+       (instance? InputStream data) (.readValue ^ObjectMapper mapper ^InputStream data ^Class Object)
+       :else                        nil))))
 
 (defn ^String to-json
   "Encode a value as a JSON string.

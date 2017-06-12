@@ -5,7 +5,8 @@
             [cheshire.generate :as generate])
   (:import (java.util UUID Date)
            (java.sql Timestamp)
-           (com.fasterxml.jackson.core JsonGenerator)))
+           (com.fasterxml.jackson.core JsonGenerator)
+           (java.io ByteArrayInputStream InputStreamReader)))
 
 (defn stays-same? [x] (= x (-> x json/to-json json/from-json)))
 
@@ -114,3 +115,12 @@
     (testing "jsonista"
       (is (canonical= (cheshire/generate-string data) (json/to-json data mapper)))
       (is (= expected (-> data (json/to-json mapper) (json/from-json mapper)))))))
+
+(defn- str->input-stream [x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
+
+(deftest from-json-input-types
+  (let [original {"ok" 1}
+        input-string (json/to-json original)]
+    (is (= original (json/from-json input-string)))
+    (is (= original (json/from-json (str->input-stream input-string))))
+    (is (= original (json/from-json (InputStreamReader. (str->input-stream input-string)))))))

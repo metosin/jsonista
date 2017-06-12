@@ -61,7 +61,7 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer)
-    (java.io InputStream Writer)))
+    (java.io InputStream InputStreamReader Writer)))
 
 (set! *warn-on-reflection* true)
 
@@ -117,19 +117,21 @@
   (make-mapper {}))
 
 (defn from-json
-  "Decode a value from a JSON string or InputStream.
+  "Decode a value from a JSON string, InputStream, or InputStreamReader.
 
   To configure, pass in an ObjectMapper created with make-mapper, or pass in a map with options.
   See make-mapper docstring for available options"
   ([data] (from-json data +default-mapper+))
   ([data opts-or-mapper]
-   (let [mapper (cond
-                  (map? opts-or-mapper)                   (make-mapper opts-or-mapper)
-                  (instance? ObjectMapper opts-or-mapper) opts-or-mapper)]
+   (let [^ObjectMapper mapper
+         (cond
+           (map? opts-or-mapper)                   (make-mapper opts-or-mapper)
+           (instance? ObjectMapper opts-or-mapper) opts-or-mapper)]
      (cond
-       (string? data)               (.readValue ^ObjectMapper mapper ^String data ^Class Object)
-       (instance? InputStream data) (.readValue ^ObjectMapper mapper ^InputStream data ^Class Object)
-       :else                        nil))))
+       (string? data)                     (.readValue mapper ^String data ^Class Object)
+       (instance? InputStreamReader data) (.readValue mapper ^InputStreamReader data ^Class Object)
+       (instance? InputStream data)       (.readValue mapper ^InputStream data ^Class Object)
+       :else                              nil))))
 
 (defn ^String to-json
   "Encode a value as a JSON string.

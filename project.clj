@@ -12,7 +12,7 @@
             [lein-virgil "0.1.6"]]
   :codox {:src-uri     "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
-          :defaults    {:doc/format :markdown}}
+          :metadata    {:doc/format :markdown}}
   :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.8.7"]
                  [com.fasterxml.jackson.core/jackson-core "2.8.7"]]
   :profiles {:dev  {:dependencies [[org.clojure/clojure "1.8.0"]

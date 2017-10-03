@@ -8,29 +8,38 @@
            (com.fasterxml.jackson.core JsonGenerator)
            (java.io ByteArrayInputStream InputStreamReader)))
 
-(defn stays-same? [x] (= x (-> x json/to-json json/from-json)))
+(defn stays-same? [x] (= x (-> x json/write-value-as-string json/read-value)))
 
-(defn make-canonical [x] (-> x json/from-json json/to-json))
+(defn make-canonical [x] (-> x json/read-value json/write-value-as-string))
 (defn canonical= [x y] (= (make-canonical x) (make-canonical y)))
 
-(def +kw-mapper+ (json/make-mapper {:keywordize? true}))
+(def +kw-mapper+ (json/object-mapper {:keywordize? true}))
 
 (deftest simple-roundrobin-test
   (is (stays-same? {"hello" "world"}))
   (is (stays-same? [1 2 3]))
-  (is (= "0.75" (json/to-json 3/4))))
+  (is (= "0.75" (json/write-value-as-string 3/4))))
 
 (deftest test-nil
-  (is (nil? (json/from-json nil)))
-  (is (= "null" (json/to-json nil))))
+  (is (nil? (json/read-value nil)))
+  (is (= "null" (json/write-value-as-string nil))))
+
+(let [data {:hello "world"}]
+  (is (= {"hello" "world"} (-> data json/write-value-as-string json/read-value)))
+  (is (= {:hello "world"} (-> data (json/write-value-as-string) (json/read-value +kw-mapper+))))
+  #_(is (= "{\n  \"hello\" : \"world\"\n}" (json/write-value-as-string data (json/object-mapper {:pretty true}))))
+  (is (= "{\"imperial-money\":\"\\u00A3\"}" (json/write-value-as-string {:imperial-money "£"} (json/object-mapper {:escape-non-ascii true}))))
+  #_(is (= "{\"mmddyyyy\":\"00-01-70\"}" (json/write-value-as-string {:mmddyyyy (Date. 0)} {:date-format "mm-dd-yy"}))))
+
+(json/write-value-as-string {:imperial-money "£"} (json/object-mapper {:escape-non-ascii true}))
 
 (deftest options-tests
   (let [data {:hello "world"}]
-    (is (= {"hello" "world"} (-> data json/to-json json/from-json)))
-    (is (= {:hello "world"} (-> data (json/to-json) (json/from-json +kw-mapper+))))
-    (is (= "{\n  \"hello\" : \"world\"\n}" (json/to-json data {:pretty true})))
-    (is (= "{\"imperial-money\":\"\\u00A3\"}" (json/to-json {:imperial-money "£"} {:escape-non-ascii true})))
-    (is (= "{\"mmddyyyy\":\"00-01-70\"}" (json/to-json {:mmddyyyy (Date. 0)} {:date-format "mm-dd-yy"})))))
+    (is (= {"hello" "world"} (-> data json/write-value-as-string json/read-value)))
+    (is (= {:hello "world"} (-> data (json/write-value-as-string) (json/read-value +kw-mapper+))))
+    (is (= "{\n  \"hello\" : \"world\"\n}" (json/write-value-as-string data (json/object-mapper {:pretty true}))))
+    (is (= "{\"imperial-money\":\"\\u00A3\"}" (json/write-value-as-string {:imperial-money "£"} (json/object-mapper {:escape-non-ascii true}))))
+    (is (= "{\"mmddyyyy\":\"00-01-70\"}" (json/write-value-as-string {:mmddyyyy (Date. 0)} (json/object-mapper {:date-format "mm-dd-yy"}))))))
 
 (deftest roundrobin-tests
   (let [data     {:numbers   {:integer     (int 1)
@@ -90,8 +99,8 @@
       (is (= expected (cheshire/parse-string (cheshire/generate-string data) true))))
 
     (testing "jsonista"
-      (is (canonical= (cheshire/generate-string data) (json/to-json data)))
-      (is (= expected (json/from-json (json/to-json data) +kw-mapper+))))))
+      (is (canonical= (cheshire/generate-string data) (json/write-value-as-string data)))
+      (is (= expected (json/read-value (json/write-value-as-string data) +kw-mapper+))))))
 
 (defrecord StringLike [value])
 
@@ -104,7 +113,7 @@
 (deftest custom-encoders
   (let [data {:like (StringLike. "boss")}
         expected {:like "boss"}
-        mapper (json/make-mapper {:keywordize? true
+        mapper (json/object-mapper {:keywordize? true
                                   :encoders {StringLike serialize-stringlike}})]
 
     (testing "cheshire"
@@ -113,14 +122,14 @@
                true))))
 
     (testing "jsonista"
-      (is (canonical= (cheshire/generate-string data) (json/to-json data mapper)))
-      (is (= expected (-> data (json/to-json mapper) (json/from-json mapper)))))))
+      (is (canonical= (cheshire/generate-string data) (json/write-value-as-string data mapper)))
+      (is (= expected (-> data (json/write-value-as-string mapper) (json/read-value mapper)))))))
 
 (defn- str->input-stream [x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
 
-(deftest from-json-input-types
+(deftest read-value-input-types
   (let [original {"ok" 1}
-        input-string (json/to-json original)]
-    (is (= original (json/from-json input-string)))
-    (is (= original (json/from-json (str->input-stream input-string))))
-    (is (= original (json/from-json (InputStreamReader. (str->input-stream input-string)))))))
+        input-string (json/write-value-as-string original)]
+    (is (= original (json/read-value input-string)))
+    (is (= original (json/read-value (str->input-stream input-string))))
+    (is (= original (json/read-value (InputStreamReader. (str->input-stream input-string)))))))

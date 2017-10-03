@@ -16,14 +16,15 @@ Status: **alpha**.
 
 ```clojure
 (require '[jsonista.core :as json])
-(json/to-json {:hello 1})
+
+(json/write-value-as-string {:hello 1})
 ;; => "{\"hello\":1}"
 
-(def +data+ (json/to-json {:foo "bar"}))
-(json/from-json +data+)
+(def +data+ (json/write-value-as-string {:foo "bar"}))
+
+(json/read-value +data+)
 ;; => {"foo" "bar"}
 ```
-
 
 ## License
 

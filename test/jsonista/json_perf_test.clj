@@ -4,9 +4,8 @@
             [jsonista.test-utils :refer :all]
             [jsonista.core :as json]
             [cheshire.core :as cheshire])
-  (:import com.fasterxml.jackson.databind.ObjectMapper
-           [java.util Map]
-           (jsonista.jackson Router)))
+  (:import (com.fasterxml.jackson.databind ObjectMapper)
+           (java.util Map)))
 
 (set! *warn-on-reflection* true)
 

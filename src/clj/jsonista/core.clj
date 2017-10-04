@@ -67,7 +67,7 @@
 
 (set! *warn-on-reflection* true)
 
-(defn- make-clojure-module
+(defn clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
@@ -95,6 +95,10 @@
   The optional first parameter is a map of options. The following options are
   available:
 
+  | General options                                                     ||
+  | ------------------- | ------------------------------------------------- |
+  | `:module`           | to override the default clojure module |
+
   | Encoding options                                                     ||
   | ------------------- | ------------------------------------------------- |
   | `:pretty`           | set to true use Jacksons pretty-printing defaults |
@@ -111,11 +115,12 @@
   | `:keywordize?`   | set to true to convert map keys into keywords (default: false) |"
   ([] (object-mapper {}))
   ([options]
-   (doto (ObjectMapper.)
-     (.registerModule (make-clojure-module options))
-     (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-             (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
-                                                  (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII]))))))
+   (let [module (or (:module options) (clojure-module options))]
+     (doto (ObjectMapper.)
+       (.registerModule module)
+       (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+               (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
+                                                    (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII])))))))
 
 (def ^ObjectMapper +default-mapper+
   "The default ObjectMapper instance."

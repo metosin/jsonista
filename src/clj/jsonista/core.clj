@@ -4,26 +4,26 @@
   Encoding example:
 
       (require '[jsonista.core :as json])
-      (json/to-json {:hello 1})
+      (json/write-value-as-string {:hello 1})
       ;; => \"{\\\"hello\\\":1}\"
 
   Decoding example:
 
-      (def +data+ (json/to-json {:foo \"bar\"}))
-      (json/from-json +data+)
+      (def +data+ (json/write-value-as-string {:foo \"bar\"}))
+      (json/read-value +data+)
       ;; => {\"foo\" \"bar\"}
 
   ## Configuration
 
   You can configure encoding and decoding by creating a custom mapper object
-  with jsonista.core/make-mapper. The options are passed in as a map.
+  with jsonista.core/object-mapper. The options are passed in as a map.
 
   For example, to convert map keys into keywords while decoding:
 
-      (json/from-json +data+ (json/make-mapper {:keywordize? true}))
+      (json/from-json +data+ (json/object-mapper {:keywordize? true}))
       ;; => {:foo \"bar\"}
 
-  See the docstring of [[make-mapper]] for all available options.
+  See the docstring of [[object-mapper]] for all available options.
 
   ## Custom encoders
 
@@ -31,14 +31,14 @@
   the parameters. The function should call JsonGenerator methods to emit the
   desired JSON. This is the same as how custom encoders work in Cheshire.
 
-  Custom encoders are configured by the make-mapper option :encoders, which is a
+  Custom encoders are configured by the object-mapper option :encoders, which is a
   map from types to encoder functions.
 
   For example, to encode java.awt.Color:
 
        (let [encoders {java.awt.Color (fn [color gen] (.writeString gen (str color)))}
-             mapper (json/make-mapper {:encoders encoders})]
-         (json/to-json (java.awt.Color. 1 2 3) mapper))
+             mapper (json/object-mapper {:encoders encoders})]
+         (json/write-value-as-string (java.awt.Color. 1 2 3) mapper))
        ;; => \"\\\"java.awt.Color[r=1,g=2,b=3]\\\"\"
 
   ## Jsonista vs. Cheshire
@@ -47,6 +47,7 @@
   benchmarks, jsonista performs better than Cheshire (take look at
   json_perf_test.clj). On the other hand, Cheshire has a wider set of features
   and has been used in production much more."
+  (:require [clojure.java.io :as io])
   (:import
     com.fasterxml.jackson.databind.ObjectMapper
     com.fasterxml.jackson.databind.module.SimpleModule
@@ -61,14 +62,15 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer)
-    (java.io InputStream InputStreamReader Writer)))
+    (java.io InputStream Writer File OutputStream DataOutput Reader)
+    (java.net URL)))
 
 (set! *warn-on-reflection* true)
 
-(defn- make-clojure-module
+(defn clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
-  See [[make-mapper]] docstring for the documentation of the options."
+  See [[object-mapper]] docstring for the documentation of the options."
   [{:keys [keywordize? encoders date-format]}]
   (doto (SimpleModule. "Clojure")
     (.addDeserializer java.util.List (PersistentVectorDeserializer.))
@@ -81,17 +83,21 @@
                                      (DateSerializer. date-format)
                                      (DateSerializer.)))
     (as-> module
-        (doseq [[cls encoder-fn] encoders]
-          (.addSerializer module cls (FunctionalSerializer. encoder-fn))))
+          (doseq [[cls encoder-fn] encoders]
+            (.addSerializer module cls (FunctionalSerializer. encoder-fn))))
     (cond->
-        ;; This key deserializer decodes the map keys into Clojure keywords.
-        keywordize? (.addKeyDeserializer Object (KeywordKeyDeserializer.)))))
+      ;; This key deserializer decodes the map keys into Clojure keywords.
+      keywordize? (.addKeyDeserializer Object (KeywordKeyDeserializer.)))))
 
-(defn ^ObjectMapper make-mapper
+(defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.
 
   The optional first parameter is a map of options. The following options are
   available:
+
+  | General options                                                     ||
+  | ------------------- | ------------------------------------------------- |
+  | `:module`           | to override the default clojure module |
 
   | Encoding options                                                     ||
   | ------------------- | ------------------------------------------------- |
@@ -107,53 +113,112 @@
   | Decoding options |                                                                |
   | ---------------- | -------------------------------------------------------------- |
   | `:keywordize?`   | set to true to convert map keys into keywords (default: false) |"
-  ([] (make-mapper {}))
+  ([] (object-mapper {}))
   ([options]
-   (doto (ObjectMapper.)
-     (.registerModule (make-clojure-module options))
-     (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-             (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
-                                                  (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII]))))))
+   (let [module (or (:module options) (clojure-module options))]
+     (doto (ObjectMapper.)
+       (.registerModule module)
+       (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+               (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
+                                                    (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII])))))))
 
 (def ^ObjectMapper +default-mapper+
-  "The default ObjectMapper instance used by [[to-json]] and [[from-json]]
-  unless you pass in a custom one."
-  (make-mapper {}))
+  "The default ObjectMapper instance."
+  (object-mapper {}))
 
-(defn- ^ObjectMapper to-mapper
-  [opts-or-mapper]
-  (cond
-    (map? opts-or-mapper) (make-mapper opts-or-mapper)
-    (instance? ObjectMapper opts-or-mapper) opts-or-mapper))
+;;
+;; Protocols
+;;
 
-(defn from-json
-  "Decode a value from a JSON string, InputStream, or InputStreamReader.
+(defprotocol ReadValue
+  (-read-value [this mapper]))
 
-  To configure, pass in an ObjectMapper created with [[make-mapper]], or pass in a map with options.
-  See [[make-mapper]] docstring for the available options."
-  ([data] (from-json data +default-mapper+))
-  ([data opts-or-mapper]
-   (let [mapper (to-mapper opts-or-mapper)]
-     (cond
-       (string? data)                     (.readValue mapper ^String data ^Class Object)
-       (instance? InputStreamReader data) (.readValue mapper ^InputStreamReader data ^Class Object)
-       (instance? InputStream data)       (.readValue mapper ^InputStream data ^Class Object)
-       :else                              nil))))
+(extend-protocol ReadValue
 
-(defn ^String to-json
+  nil
+  (-read-value [this mapper])
+
+  File
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
+  URL
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
+  String
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
+  Reader
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
+  InputStream
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object)))
+
+(defprotocol WriteValue
+  (-write-value [this value mapper]))
+
+(extend-protocol WriteValue
+  File
+  (-write-value [this value ^ObjectMapper mapper]
+    (.writeValue mapper this value))
+
+  OutputStream
+  (-write-value [this value ^ObjectMapper mapper]
+    (.writeValue mapper this value))
+
+  DataOutput
+  (-write-value [this value ^ObjectMapper mapper]
+    (.writeValue mapper this value))
+
+  Writer
+  (-write-value [this value ^ObjectMapper mapper]
+    (.writeValue mapper this value)))
+
+;;
+;; public api
+;;
+
+(defn read-value
+  "Decodes a value from a JSON string from anything that
+  satisfies [[ReadValue]] protocol. By default,
+  File, URL, String, Reader and InputStream are supported.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
+  See [[object-mapper]] docstring for the available options."
+  ([object]
+   (-read-value object +default-mapper+))
+  ([object ^ObjectMapper mapper]
+   (-read-value object mapper)))
+
+(defn write-value-as-string
   "Encode a value as a JSON string.
 
-  To configure, pass in an ObjectMapper created with [[make-mapper]], or pass in a map with options.
-  See [[make-mapper]] docstring for the available options."
-  ([object] (to-json object +default-mapper+))
-  ([object opts-or-mapper]
-   (.writeValueAsString (to-mapper opts-or-mapper) object)))
+  To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  ([object]
+   (.writeValueAsString +default-mapper+ object))
+  ([object ^ObjectMapper mapper]
+   (.writeValueAsString mapper object)))
 
-(defn ^String write-to
-  "Encode a value as JSON and write using the provided Writer.
+(defn write-value-as-bytes
+  "Encode a value as a JSON byte-array.
 
-  To configure, pass in an ObjectMapper created with [[make-mapper]], or pass in a map with options.
-  See [[make-mapper]] docstring for the available options."
-  ([object ^Writer writer] (write-to object writer +default-mapper+))
-  ([object ^Writer writer ^ObjectMapper opts-or-mapper]
-   (.writeValue (to-mapper opts-or-mapper) writer object)))
+  To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  ([object]
+   (.writeValueAsBytes +default-mapper+ object))
+  ([object ^ObjectMapper mapper]
+   (.writeValueAsBytes mapper object)))
+
+(defn write-value
+  "Encode a value as JSON and write using the provided [[WriteValue]] instance.
+  By default, File, OutputStream, DataOutput and Writer are supported.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
+  See [[object-mapper]] docstring for the available options."
+  ([to object]
+   (-write-value to object +default-mapper+))
+  ([to object ^ObjectMapper mapper]
+   (-write-value to object mapper)))

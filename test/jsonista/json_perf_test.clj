@@ -4,8 +4,8 @@
             [jsonista.test-utils :refer :all]
             [jsonista.core :as json]
             [cheshire.core :as cheshire])
-  (:import com.fasterxml.jackson.databind.ObjectMapper
-           [java.util Map]))
+  (:import (com.fasterxml.jackson.databind ObjectMapper)
+           (java.util Map)))
 
 (set! *warn-on-reflection* true)
 
@@ -34,19 +34,20 @@
   (title "encode: cheshire")
   (let [encode (fn [] (cheshire/generate-string {"hello" "world"}))]
     (assert (= +json+ (encode)))
-    (cc/bench (encode)))
+    (cc/quick-bench (encode)))
 
   ;; 249ns
+  ;; 201ns
   (title "encode: jsonista")
-  (let [encode (fn [] (json/to-json {"hello" "world"}))]
+  (let [encode (fn [] (json/write-value-as-string {"hello" "world"}))]
     (assert (= +json+ (encode)))
-    (cc/bench (encode)))
+    (cc/quick-bench (encode)))
 
   ;; 82ns
   (title "encode: str")
   (let [encode (fn [] (str "{\"hello\":\"" "world" "\"}"))]
     (assert (= +json+ (encode)))
-    (cc/bench (encode))))
+    (cc/quick-bench (encode))))
 
 (defn decode-perf []
 
@@ -54,20 +55,21 @@
   (title "decode: cheshire")
   (let [decode (fn [] (cheshire/parse-string-strict +json+))]
     (assert (= +data+ (decode)))
-    (cc/bench (decode)))
+    (cc/quick-bench (decode)))
 
   ;; 416ns
+  ;; 378ns
   (title "decode: jsonista")
-  (let [decode (fn [] (json/from-json +json+))]
+  (let [decode (fn [] (json/read-value +json+))]
     (assert (= +data+ (decode)))
-    (cc/bench (decode)))
+    (cc/quick-bench (decode)))
 
   ;; 246ns
   (title "decode: jackson")
   (let [mapper (ObjectMapper.)
         decode (fn [] (.readValue mapper +json+ Map))]
     (assert (= +data+ (decode)))
-    (cc/bench (decode))))
+    (cc/quick-bench (decode))))
 
 (defn encode-perf-different-sizes []
   (doseq [file ["dev-resources/json10b.json"
@@ -78,9 +80,10 @@
           :let [data (cheshire/parse-string (slurp file))
                 json (cheshire/generate-string data)]]
     (let [encode-cheshire (fn [] (cheshire/generate-string data))
-          encode-jsonista (fn [] (json/to-json data))]
+          encode-jsonista (fn [] (json/write-value-as-string data))]
 
       (title file)
+      (println data)
 
       ;  1.1µs (10b)
       ;  2.6µs (100b)
@@ -89,7 +92,7 @@
       ;  915µs (100k)
       (title "encode: cheshire")
       (assert (= json (encode-cheshire)))
-      (cc/bench (encode-cheshire))
+      (cc/quick-bench (encode-cheshire))
 
       ;  0.2µs (10b)  - +450%
       ;  0.6µs (100b) - +330%
@@ -98,7 +101,10 @@
       ;  360µs (100k) - +150%
       (title "encode: jsonista")
       (assert (= json (encode-jsonista)))
-      (cc/bench (encode-jsonista)))))
+      (cc/quick-bench (encode-jsonista)))))
+
+(comment
+  (encode-perf-different-sizes))
 
 (defn decode-perf-different-sizes []
   (doseq [file ["dev-resources/json10b.json"
@@ -109,7 +115,7 @@
           :let [data (cheshire/parse-string (slurp file))
                 json (cheshire/generate-string data)]]
     (let [decode-cheshire (fn [] (cheshire/parse-string json))
-          decode-jsonista (fn [] (json/from-json json))]
+          decode-jsonista (fn [] (json/read-value json))]
 
       (title file)
 
@@ -120,7 +126,7 @@
       ; 1000µs (100k)
       (title "decode: cheshire")
       (assert (= data (decode-cheshire)))
-      (cc/bench (decode-cheshire))
+      (cc/quick-bench (decode-cheshire))
 
       ;  0.4µs (10b)  - +150%
       ;  1.5µs (100b) -  +30%
@@ -129,7 +135,7 @@
       ;  770µs (100k) -  +30%
       (title "decode: jsonista")
       (assert (= data (decode-jsonista)))
-      (cc/bench (decode-jsonista)))))
+      (cc/quick-bench (decode-jsonista)))))
 
 
 (comment

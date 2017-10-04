@@ -37,35 +37,11 @@ Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while s
 * Jackson `ObjectMapper` is used directly
 * Small functions to support JVM Inlining
 
-```clj
-(require '[cheshire.core :as cheshire])
-(require '[jsonista.core :as jsonista])
-(require '[criterium.core :as cc])
+See [perf-tests](/test/jsonista/json_perf_test.clj) for details.
 
-;; encode
+![encode](/docs/encode.png)
 
-(def data {:kikka "kukka"})
-
-(cc/quick-bench
-  (cheshire/generate-string data))
-; 1248ns
-
-(cc/quick-bench
-  (jsonista/write-value-as-string data))
-; 227ns
-
-;; decode
-
-(def json "{\"kikka\": \"kukka\"}")
-
-(cc/quick-bench
-  (cheshire/parse-string json))
-; 978ns
-
-(cc/quick-bench
-  (jsonista/read-value json))
-; 380ns
-```
+![decode](/docs/decode.png)
 
 ## License
 

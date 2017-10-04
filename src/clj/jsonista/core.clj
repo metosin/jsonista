@@ -62,7 +62,8 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer)
-    (java.io InputStream InputStreamReader Writer File OutputStream DataOutput)))
+    (java.io InputStream Writer File OutputStream DataOutput Reader)
+    (java.net URL)))
 
 (set! *warn-on-reflection* true)
 
@@ -128,20 +129,29 @@
   (-read-value [this mapper]))
 
 (extend-protocol ReadValue
+
+  nil
+  (-read-value [this mapper])
+
+  File
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
+  URL
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+
   String
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object))
 
-  InputStreamReader
+  Reader
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object))
 
   InputStream
   (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
-  nil
-  (-read-value [this mapper]))
+    (.readValue mapper this ^Class Object)))
 
 (defprotocol WriteValue
   (-write-value [this value mapper]))
@@ -168,10 +178,12 @@
 ;;
 
 (defn read-value
-  "Decode a value from a JSON string, InputStream, InputStreamReader or
-  anything that satisfies jsonista.core/ReadValue protocol.
+  "Decodes a value from a JSON string from anything that
+  satisfies [[ReadValue]] protocol. By default,
+  File, URL, String, Reader and InputStream are supported.
 
-  To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
+  See [[object-mapper]] docstring for the available options."
   ([object]
    (-read-value object +default-mapper+))
   ([object ^ObjectMapper mapper]
@@ -197,11 +209,11 @@
 
 (defn write-value
   "Encode a value as JSON and write using the provided [[WriteValue]] instance.
-  File, OutputStream, DataOutput and Writer are supported by default.
+  By default, File, OutputStream, DataOutput and Writer are supported.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
   See [[object-mapper]] docstring for the available options."
-  ([object writer]
-   (-write-value +default-mapper+ object writer))
-  ([object to ^ObjectMapper mapper]
+  ([to object]
+   (-write-value to object +default-mapper+))
+  ([to object ^ObjectMapper mapper]
    (-write-value to object mapper)))

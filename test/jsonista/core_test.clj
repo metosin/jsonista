@@ -7,8 +7,9 @@
            (java.sql Timestamp)
            (com.fasterxml.jackson.core JsonGenerator)
            (java.io ByteArrayInputStream InputStreamReader File FileOutputStream RandomAccessFile FileWriter)
-           (jsonista.jackson KeywordSerializer)
-           (clojure.lang Keyword ExceptionInfo)))
+           (jsonista.jackson KeywordSerializer FunctionalSerializer)
+           (clojure.lang Keyword ExceptionInfo)
+           (com.fasterxml.jackson.databind JsonSerializer)))
 
 (defn stays-same? [x] (= x (-> x jsonista/write-value-as-string jsonista/read-value)))
 
@@ -116,7 +117,7 @@
   (let [data {:like (StringLike. "boss")}
         expected {:like "boss"}
         mapper (jsonista/object-mapper {:keywordize? true
-                                    :encoders {StringLike serialize-stringlike}})]
+                                        :encoders {StringLike serialize-stringlike}})]
 
     (testing "cheshire"
       (is (= expected (cheshire/parse-string
@@ -125,12 +126,13 @@
 
     (testing "jsonista"
       (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
-      (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper))))))
+      (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))
 
-  (testing "using JsonSerializer instances"
-    (let [mapper (jsonista/object-mapper {:encoders {Keyword (KeywordSerializer. true)}})
-          json (cheshire/generate-string {:kikka "kukka"})]
-      (is (= {"kikka" "kukka"} (jsonista/read-value json mapper)))))
+    (testing "using JsonSerializer instances"
+      (let [mapper (jsonista/object-mapper {:keywordize? true
+                                            :encoders {StringLike (FunctionalSerializer. serialize-stringlike)}})]
+        (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
+        (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))))
 
   (testing "invalid encoder can't be registered"
     (is (thrown-with-msg?

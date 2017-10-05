@@ -49,10 +49,6 @@
   and has been used in production much more."
   (:require [clojure.java.io :as io])
   (:import
-    com.fasterxml.jackson.databind.ObjectMapper
-    com.fasterxml.jackson.databind.module.SimpleModule
-    com.fasterxml.jackson.databind.SerializationFeature
-    com.fasterxml.jackson.core.JsonGenerator$Feature
     (jsonista.jackson
       DateSerializer
       FunctionalSerializer
@@ -62,12 +58,18 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer)
+    (com.fasterxml.jackson.core JsonGenerator$Feature)
+    (com.fasterxml.jackson.databind
+      JsonSerializer
+      ObjectMapper
+      module.SimpleModule
+      SerializationFeature)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)))
 
 (set! *warn-on-reflection* true)
 
-(defn clojure-module
+(defn- clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
@@ -83,8 +85,13 @@
                                      (DateSerializer. date-format)
                                      (DateSerializer.)))
     (as-> module
-          (doseq [[cls encoder-fn] encoders]
-            (.addSerializer module cls (FunctionalSerializer. encoder-fn))))
+          (doseq [[type encoder] encoders]
+            (cond
+              (instance? JsonSerializer encoder) (.addSerializer module type encoder)
+              (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
+              :else (throw (ex-info
+                             (str "Can't register encoder " encoder " for type " type)
+                             {:type type, :encoder encoder})))))
     (cond->
       ;; This key deserializer decodes the map keys into Clojure keywords.
       keywordize? (.addKeyDeserializer Object (KeywordKeyDeserializer.)))))
@@ -94,10 +101,6 @@
 
   The optional first parameter is a map of options. The following options are
   available:
-
-  | General options                                                     ||
-  | ------------------- | ------------------------------------------------- |
-  | `:module`           | to override the default clojure module |
 
   | Encoding options                                                     ||
   | ------------------- | ------------------------------------------------- |
@@ -115,12 +118,11 @@
   | `:keywordize?`   | set to true to convert map keys into keywords (default: false) |"
   ([] (object-mapper {}))
   ([options]
-   (let [module (or (:module options) (clojure-module options))]
-     (doto (ObjectMapper.)
-       (.registerModule module)
-       (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-               (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
-                                                    (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII])))))))
+   (doto (ObjectMapper.)
+     (.registerModule (clojure-module options))
+     (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+             (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
+                                                  (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII]))))))
 
 (def ^ObjectMapper +default-mapper+
   "The default ObjectMapper instance."

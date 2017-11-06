@@ -21,12 +21,12 @@ Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while s
 ```clojure
 (require '[jsonista.core :as jsonista])
 
-(jsonista/write-value-as-string {:hello 1})
+(jsonista/to-json {:hello 1})
 ;; => "{\"hello\":1}"
 
-(def +data+ (jsonista/write-value-as-string {:foo "bar"}))
+(def +data+ (jsonista/to-json {:foo "bar"}))
 
-(jsonista/read-value +data+)
+(jsonista/from-json +data+)
 ;; => {"foo" "bar"}
 ```
 

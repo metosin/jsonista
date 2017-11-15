@@ -51,6 +51,7 @@
   (:import
     (jsonista.jackson
       DateSerializer
+      FunctionalKeyDeserializer
       FunctionalSerializer
       KeywordSerializer
       KeywordKeyDeserializer
@@ -64,6 +65,7 @@
       ObjectMapper
       module.SimpleModule
       SerializationFeature)
+    (com.fasterxml.jackson.databind.module SimpleModule)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)))
 
@@ -73,7 +75,7 @@
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
-  [{:keys [keywordize? encoders date-format]}]
+  [{:keys [key-fn encoders date-format]}]
   (doto (SimpleModule. "Clojure")
     (.addDeserializer java.util.List (PersistentVectorDeserializer.))
     (.addDeserializer java.util.Map (PersistentHashMapDeserializer.))
@@ -93,8 +95,8 @@
                              (str "Can't register encoder " encoder " for type " type)
                              {:type type, :encoder encoder})))))
     (cond->
-      ;; This key deserializer decodes the map keys into Clojure keywords.
-      keywordize? (.addKeyDeserializer Object (KeywordKeyDeserializer.)))))
+      (true? key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
+      (fn? key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. key-fn)))))
 
 (defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.
@@ -115,7 +117,7 @@
 
   | Decoding options |                                                                |
   | ---------------- | -------------------------------------------------------------- |
-  | `:keywordize?`   | set to true to convert map keys into keywords (default: false) |"
+  | `:key-fn`        |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |"
   ([] (object-mapper {}))
   ([options]
    (doto (ObjectMapper.)

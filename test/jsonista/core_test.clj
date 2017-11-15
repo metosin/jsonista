@@ -2,7 +2,8 @@
   (:require [clojure.test :refer [deftest is testing]]
             [jsonista.core :as jsonista]
             [cheshire.core :as cheshire]
-            [cheshire.generate :as generate])
+            [cheshire.generate :as generate]
+            [clojure.string :as str])
   (:import (java.util UUID Date)
            (java.sql Timestamp)
            (com.fasterxml.jackson.core JsonGenerator)
@@ -16,7 +17,9 @@
 (defn make-canonical [x] (-> x jsonista/read-value jsonista/write-value-as-string))
 (defn canonical= [x y] (= (make-canonical x) (make-canonical y)))
 
-(def +kw-mapper+ (jsonista/object-mapper {:keywordize? true}))
+(def +kw-mapper+ (jsonista/object-mapper {:key-fn true}))
+(def +upper-mapper+ (jsonista/object-mapper {:key-fn str/upper-case}))
+(def +string-mapper+ (jsonista/object-mapper {:key-fn false}))
 
 (deftest simple-roundrobin-test
   (is (stays-same? {"hello" "world"}))
@@ -27,22 +30,19 @@
   (is (nil? (jsonista/read-value nil)))
   (is (= "null" (jsonista/write-value-as-string nil))))
 
-(let [data {:hello "world"}]
-  (is (= {"hello" "world"} (-> data jsonista/write-value-as-string jsonista/read-value)))
-  (is (= {:hello "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +kw-mapper+))))
-  (is (= "{\n  \"hello\" : \"world\"\n}" (jsonista/write-value-as-string data (jsonista/object-mapper {:pretty true}))))
-  (is (= "{\"imperial-money\":\"\\u00A3\"}" (jsonista/write-value-as-string {:imperial-money "£"} (jsonista/object-mapper {:escape-non-ascii true}))))
-  (is (= "{\"mmddyyyy\":\"00-01-70\"}" (jsonista/write-value-as-string {:mmddyyyy (Date. 0)} (jsonista/object-mapper {:date-format "mm-dd-yy"})))))
-
-(jsonista/write-value-as-string {:imperial-money "£"} (jsonista/object-mapper {:escape-non-ascii true}))
-
 (deftest options-tests
   (let [data {:hello "world"}]
-    (is (= {"hello" "world"} (-> data jsonista/write-value-as-string jsonista/read-value)))
-    (is (= {:hello "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +kw-mapper+))))
-    (is (= "{\n  \"hello\" : \"world\"\n}" (jsonista/write-value-as-string data (jsonista/object-mapper {:pretty true}))))
-    (is (= "{\"imperial-money\":\"\\u00A3\"}" (jsonista/write-value-as-string {:imperial-money "£"} (jsonista/object-mapper {:escape-non-ascii true}))))
-    (is (= "{\"mmddyyyy\":\"00-01-70\"}" (jsonista/write-value-as-string {:mmddyyyy (Date. 0)} (jsonista/object-mapper {:date-format "mm-dd-yy"}))))))
+    (testing ":key-fn"
+      (is (= {"hello" "world"} (-> data jsonista/write-value-as-string jsonista/read-value)))
+      (is (= {:hello "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +kw-mapper+))))
+      (is (= {"hello" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +string-mapper+))))
+      (is (= {"HELLO" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +upper-mapper+)))))
+    (testing ":pretty"
+      (is (= "{\n  \"hello\" : \"world\"\n}" (jsonista/write-value-as-string data (jsonista/object-mapper {:pretty true})))))
+    (testing ":escape-non-ascii"
+      (is (= "{\"imperial-money\":\"\\u00A3\"}" (jsonista/write-value-as-string {:imperial-money "£"} (jsonista/object-mapper {:escape-non-ascii true})))))
+    (testing ":date-format"
+      (is (= "{\"mmddyyyy\":\"00-01-70\"}" (jsonista/write-value-as-string {:mmddyyyy (Date. 0)} (jsonista/object-mapper {:date-format "mm-dd-yy"})))))))
 
 (deftest roundrobin-tests
   (let [data {:numbers {:integer (int 1)
@@ -116,7 +116,7 @@
 (deftest custom-encoders
   (let [data {:like (StringLike. "boss")}
         expected {:like "boss"}
-        mapper (jsonista/object-mapper {:keywordize? true
+        mapper (jsonista/object-mapper {:key-fn true
                                         :encoders {StringLike serialize-stringlike}})]
 
     (testing "cheshire"
@@ -129,7 +129,7 @@
       (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))
 
     (testing "using JsonSerializer instances"
-      (let [mapper (jsonista/object-mapper {:keywordize? true
+      (let [mapper (jsonista/object-mapper {:key-fn true
                                             :encoders {StringLike (FunctionalSerializer. serialize-stringlike)}})]
         (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
         (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))))

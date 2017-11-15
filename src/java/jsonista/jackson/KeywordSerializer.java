@@ -17,7 +17,7 @@ public class KeywordSerializer extends StdSerializer<Keyword> {
 
   @Override
   public void serialize(Keyword value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-    String text = value.toString().substring(1);
+    String text = value.sym.toString();
     if (writeFieldName) {
       gen.writeFieldName(text);
     } else {

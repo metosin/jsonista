@@ -24,6 +24,7 @@ public class DateSerializer extends StdSerializer<Date> {
 
   @Override
   public void serialize(Date value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    // TODO: use something like jackson-datatype-jsr310?
     // SimpleDateFormat is not thread-safe, so we must synchronize it.
     synchronized (formatter) {
       gen.writeString(formatter.format(value));

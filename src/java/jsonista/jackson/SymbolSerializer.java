@@ -8,12 +8,12 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 public class SymbolSerializer extends StdSerializer<Symbol> {
-    public SymbolSerializer() {
-        super(SymbolSerializer.class, true);
-    }
+  public SymbolSerializer() {
+    super(SymbolSerializer.class, true);
+  }
 
-    @Override
-    public void serialize(Symbol value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        gen.writeString(value.toString());
-    }
+  @Override
+  public void serialize(Symbol value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    gen.writeString(value.toString());
+  }
 }

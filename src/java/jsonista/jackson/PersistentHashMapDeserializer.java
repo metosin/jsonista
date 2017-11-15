@@ -14,26 +14,26 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import java.io.IOException;
 import java.util.Map;
 
-public class PersistentHashMapDeserializer extends StdDeserializer<Map<String,Object>> {
-    public PersistentHashMapDeserializer() {
-        super(Map.class);
+public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, Object>> {
+  public PersistentHashMapDeserializer() {
+    super(Map.class);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Map<String, Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    ITransientMap t = PersistentHashMap.EMPTY.asTransient();
+    JavaType object = ctxt.constructType(Object.class);
+    KeyDeserializer keyDeser = ctxt.findKeyDeserializer(object, null);
+    JsonDeserializer<Object> valueDeser = ctxt.findNonContextualValueDeserializer(object);
+    while (p.nextToken() != JsonToken.END_OBJECT) {
+      Object key = keyDeser.deserializeKey(p.getCurrentName(), ctxt);
+      p.nextToken();
+      Object value = valueDeser.deserialize(p, ctxt);
+      t = t.assoc(key, value);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        ITransientMap t = PersistentHashMap.EMPTY.asTransient();
-        JavaType object = ctxt.constructType(Object.class);
-        KeyDeserializer keyDeser = ctxt.findKeyDeserializer(object, null);
-        JsonDeserializer<Object> valueDeser = ctxt.findNonContextualValueDeserializer(object);
-        while (p.nextToken() != JsonToken.END_OBJECT) {
-            Object key = keyDeser.deserializeKey(p.getCurrentName(), ctxt);
-            p.nextToken();
-            Object value = valueDeser.deserialize(p, ctxt);
-            t = t.assoc(key, value);
-        }
-
-        // t.persistent() returns a PersistentHashMap, which is a Map.
-        return (Map<String,Object>)t.persistent();
-    }
+    // t.persistent() returns a PersistentHashMap, which is a Map.
+    return (Map<String, Object>) t.persistent();
+  }
 }

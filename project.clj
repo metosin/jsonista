@@ -9,15 +9,15 @@
   :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
   :java-source-paths ["src/java"]
   :plugins [[lein-codox "0.10.3"]
-            [lein-virgil "0.1.6"]]
+            [lein-virgil "0.1.7"]]
   :codox {:src-uri     "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata    {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.8.7"]
-                 [com.fasterxml.jackson.core/jackson-core "2.8.7"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.2"]
+                 [com.fasterxml.jackson.core/jackson-core "2.9.2"]]
   :profiles {:dev  {:dependencies [[org.clojure/clojure "1.8.0"]
                                    [criterium "0.4.4"]
-                                   [cheshire "5.7.1"]]}
+                                   [cheshire "5.8.0"]]}
              :1.7  {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.9  {:dependencies [[org.clojure/clojure "1.9.0-alpha15"]]}
              :perf {:jvm-opts ^:replace ["-server"

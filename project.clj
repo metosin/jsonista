@@ -9,7 +9,7 @@
   :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
   :java-source-paths ["src/java"]
   :plugins [[lein-codox "0.10.3"]
-            [lein-virgil "0.1.7"]]
+            [lein-virgil "0.1.6"]]
   :codox {:src-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 
 public class SymbolSerializer extends StdSerializer<Symbol> {
+
   public SymbolSerializer() {
     super(SymbolSerializer.class, true);
   }

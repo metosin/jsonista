@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 
 public class PersistentVectorDeserializer extends StdDeserializer<List<Object>> {
+
   public PersistentVectorDeserializer() {
     super(List.class);
   }

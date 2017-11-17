@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Map;
 
 public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, Object>> {
+
   public PersistentHashMapDeserializer() {
     super(Map.class);
   }

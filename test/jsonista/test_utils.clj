@@ -1,18 +1,4 @@
-(ns jsonista.test-utils
-  (:import [java.io ByteArrayInputStream]))
-
-(set! *warn-on-reflection* true)
-
-(defn request-stream [request]
-  (let [b (.getBytes ^String (:body request))]
-    (fn []
-      (assoc request :body (ByteArrayInputStream. b)))))
-
-(defn context-stream [request]
-  (let [b (.getBytes ^String (:body request))
-        ctx {:request request}]
-    (fn []
-      (assoc-in ctx [:request :body] (ByteArrayInputStream. b)))))
+(ns jsonista.test-utils)
 
 (defn title [s]
   (println

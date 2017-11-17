@@ -10,9 +10,9 @@ import java.io.IOException;
 public class FunctionalSerializer<T> extends StdSerializer<T> {
   private final IFn encoder;
 
-  public FunctionalSerializer(IFn encoderFunction) {
+  public FunctionalSerializer(IFn encoder) {
     super(FunctionalSerializer.class, true);
-    encoder = encoderFunction;
+    this.encoder = encoder;
   }
 
   @Override

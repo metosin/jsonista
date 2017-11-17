@@ -17,9 +17,9 @@
 (defn make-canonical [x] (-> x jsonista/read-value jsonista/write-value-as-string))
 (defn canonical= [x y] (= (make-canonical x) (make-canonical y)))
 
-(def +kw-mapper+ (jsonista/object-mapper {:key-fn true}))
-(def +upper-mapper+ (jsonista/object-mapper {:key-fn str/upper-case}))
-(def +string-mapper+ (jsonista/object-mapper {:key-fn false}))
+(def +kw-mapper+ (jsonista/object-mapper {:decode-key-fn true}))
+(def +upper-mapper+ (jsonista/object-mapper {:decode-key-fn str/upper-case}))
+(def +string-mapper+ (jsonista/object-mapper {:decode-key-fn false}))
 
 (deftest simple-roundrobin-test
   (is (stays-same? {"hello" "world"}))
@@ -32,11 +32,16 @@
 
 (deftest options-tests
   (let [data {:hello "world"}]
-    (testing ":key-fn"
+    (testing ":decode-key-fn"
       (is (= {"hello" "world"} (-> data jsonista/write-value-as-string jsonista/read-value)))
       (is (= {:hello "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +kw-mapper+))))
       (is (= {"hello" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +string-mapper+))))
       (is (= {"HELLO" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +upper-mapper+)))))
+    (testing ":encode-key-fn"
+      (let [data {:hello "world"}]
+        (is (= "{\"hello\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn true}))))
+        (is (= "{\":hello\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn false}))))
+        (is (= "{\"HELLO\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn (comp str/upper-case name)}))))))
     (testing ":pretty"
       (is (= "{\n  \"hello\" : \"world\"\n}" (jsonista/write-value-as-string data (jsonista/object-mapper {:pretty true})))))
     (testing ":escape-non-ascii"
@@ -116,7 +121,7 @@
 (deftest custom-encoders
   (let [data {:like (StringLike. "boss")}
         expected {:like "boss"}
-        mapper (jsonista/object-mapper {:key-fn true
+        mapper (jsonista/object-mapper {:decode-key-fn true
                                         :encoders {StringLike serialize-stringlike}})]
 
     (testing "cheshire"
@@ -129,7 +134,7 @@
       (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))
 
     (testing "using JsonSerializer instances"
-      (let [mapper (jsonista/object-mapper {:key-fn true
+      (let [mapper (jsonista/object-mapper {:decode-key-fn true
                                             :encoders {StringLike (FunctionalSerializer. serialize-stringlike)}})]
         (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
         (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))))

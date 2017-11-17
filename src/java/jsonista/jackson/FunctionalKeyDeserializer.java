@@ -9,9 +9,8 @@ import java.io.IOException;
 public class FunctionalKeyDeserializer extends KeyDeserializer {
   private final IFn encoder;
 
-  public FunctionalKeyDeserializer(IFn encoderFunction) {
-    super();
-    encoder = encoderFunction;
+  public FunctionalKeyDeserializer(IFn encoder) {
+    this.encoder = encoder;
   }
 
   @Override

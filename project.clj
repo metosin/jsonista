@@ -19,7 +19,7 @@
                                   [criterium "0.4.4"]
                                   [cheshire "5.8.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-RC2"]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-RC1"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}

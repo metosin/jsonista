@@ -65,7 +65,7 @@
       module.SimpleModule
       SerializationFeature)
     (com.fasterxml.jackson.databind.module SimpleModule)
-    (java.io InputStream Writer File OutputStream DataOutput Reader)
+    (java.io InputStream Writer File OutputStream DataOutput Reader ByteArrayInputStream)
     (java.net URL)))
 
 (set! *warn-on-reflection* true)
@@ -200,7 +200,7 @@
   ([object ^ObjectMapper mapper]
    (-read-value object mapper)))
 
-(defn write-value-as-string
+(defn ^String write-value-as-string
   "Encode a value as a JSON string.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."
@@ -209,7 +209,7 @@
   ([object ^ObjectMapper mapper]
    (.writeValueAsString mapper object)))
 
-(defn write-value-as-bytes
+(defn ^bytes write-value-as-bytes
   "Encode a value as a JSON byte-array.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."

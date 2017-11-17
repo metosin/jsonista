@@ -12,6 +12,8 @@
            (clojure.lang Keyword ExceptionInfo)
            (com.fasterxml.jackson.databind JsonSerializer)))
 
+(set! *warn-on-reflection* true)
+
 (defn stays-same? [x] (= x (-> x jsonista/write-value-as-string jsonista/read-value)))
 
 (defn make-canonical [x] (-> x jsonista/read-value jsonista/write-value-as-string))
@@ -145,7 +147,7 @@
           #"Can't register encoder 123 for type class clojure.lang.Keyword"
           (jsonista/object-mapper {:encoders {Keyword 123}})))))
 
-(defn- str->input-stream [x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
+(defn- str->input-stream [^String x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
 
 (defn tmp-file ^File [] (File/createTempFile "temp" ".json"))
 

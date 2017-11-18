@@ -209,7 +209,7 @@
   ([object ^ObjectMapper mapper]
    (.writeValueAsString mapper object)))
 
-(defn ^bytes write-value-as-bytes
+(defn write-value-as-bytes
   "Encode a value as a JSON byte-array.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."

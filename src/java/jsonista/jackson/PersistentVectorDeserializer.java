@@ -13,19 +13,20 @@ import java.io.IOException;
 import java.util.List;
 
 public class PersistentVectorDeserializer extends StdDeserializer<List<Object>> {
-    public PersistentVectorDeserializer() {
-        super(List.class);
-    }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        ITransientCollection t = PersistentVector.EMPTY.asTransient();
-        JsonDeserializer<Object> deser = ctxt.findNonContextualValueDeserializer(ctxt.constructType(Object.class));
-        while (p.nextValue() != JsonToken.END_ARRAY) {
-            t = t.conj(deser.deserialize(p, ctxt));
-        }
-        // t.persistent() returns a PersistentVector which is a list
-        return (List<Object>)t.persistent();
+  public PersistentVectorDeserializer() {
+    super(List.class);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public List<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    ITransientCollection t = PersistentVector.EMPTY.asTransient();
+    JsonDeserializer<Object> deser = ctxt.findNonContextualValueDeserializer(ctxt.constructType(Object.class));
+    while (p.nextValue() != JsonToken.END_ARRAY) {
+      t = t.conj(deser.deserialize(p, ctxt));
     }
+    // t.persistent() returns a PersistentVector which is a list
+    return (List<Object>) t.persistent();
+  }
 }

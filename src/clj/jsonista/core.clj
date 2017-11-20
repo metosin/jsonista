@@ -20,7 +20,7 @@
 
   For example, to convert map keys into keywords while decoding:
 
-      (json/from-json +data+ (json/object-mapper {:keywordize? true}))
+      (json/from-json +data+ (json/object-mapper {:decode-key-fn true}))
       ;; => {:foo \"bar\"}
 
   See the docstring of [[object-mapper]] for all available options.
@@ -47,24 +47,25 @@
   benchmarks, jsonista performs better than Cheshire (take look at
   json_perf_test.clj). On the other hand, Cheshire has a wider set of features
   and has been used in production much more."
-  (:require [clojure.java.io :as io])
   (:import
     (jsonista.jackson
       DateSerializer
+      FunctionalKeyDeserializer
       FunctionalSerializer
       KeywordSerializer
       KeywordKeyDeserializer
       PersistentHashMapDeserializer
       PersistentVectorDeserializer
       SymbolSerializer
-      RatioSerializer)
+      RatioSerializer FunctionalKeywordSerializer)
     (com.fasterxml.jackson.core JsonGenerator$Feature)
     (com.fasterxml.jackson.databind
       JsonSerializer
       ObjectMapper
       module.SimpleModule
       SerializationFeature)
-    (java.io InputStream Writer File OutputStream DataOutput Reader)
+    (com.fasterxml.jackson.databind.module SimpleModule)
+    (java.io InputStream Writer File OutputStream DataOutput Reader ByteArrayInputStream)
     (java.net URL)))
 
 (set! *warn-on-reflection* true)
@@ -73,14 +74,14 @@
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
-  [{:keys [keywordize? encoders date-format]}]
+  [{:keys [encode-key-fn decode-key-fn encoders date-format]
+    :or {encode-key-fn true, decode-key-fn false}}]
   (doto (SimpleModule. "Clojure")
     (.addDeserializer java.util.List (PersistentVectorDeserializer.))
     (.addDeserializer java.util.Map (PersistentHashMapDeserializer.))
     (.addSerializer clojure.lang.Keyword (KeywordSerializer. false))
     (.addSerializer clojure.lang.Ratio (RatioSerializer.))
     (.addSerializer clojure.lang.Symbol (SymbolSerializer.))
-    (.addKeySerializer clojure.lang.Keyword (KeywordSerializer. true))
     (.addSerializer java.util.Date (if date-format
                                      (DateSerializer. date-format)
                                      (DateSerializer.)))
@@ -93,8 +94,10 @@
                              (str "Can't register encoder " encoder " for type " type)
                              {:type type, :encoder encoder})))))
     (cond->
-      ;; This key deserializer decodes the map keys into Clojure keywords.
-      keywordize? (.addKeyDeserializer Object (KeywordKeyDeserializer.)))))
+      (true? decode-key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
+      (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
+      (true? encode-key-fn) (.addKeySerializer clojure.lang.Keyword (KeywordSerializer. true))
+      (fn? encode-key-fn) (.addKeySerializer clojure.lang.Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
 
 (defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.
@@ -107,15 +110,16 @@
   | `:pretty`           | set to true use Jacksons pretty-printing defaults |
   | `:escape-non-ascii` | set to true to escape non ascii characters        |
   | `:date-format`      | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`  |
+  | `:encode-key-fn`    | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`         | a map of custom encoders where keys should be types and values should be encoder functions |
 
   Encoder functions take two parameters: the value to be encoded and a
   JsonGenerator object. The function should call JsonGenerator methods to emit
   the desired JSON.
 
-  | Decoding options |                                                                |
-  | ---------------- | -------------------------------------------------------------- |
-  | `:keywordize?`   | set to true to convert map keys into keywords (default: false) |"
+  | Decoding options    |                                                                |
+  | ------------------- | -------------------------------------------------------------- |
+  | `:decode-key-fn`    |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |"
   ([] (object-mapper {}))
   ([options]
    (doto (ObjectMapper.)
@@ -196,7 +200,7 @@
   ([object ^ObjectMapper mapper]
    (-read-value object mapper)))
 
-(defn write-value-as-string
+(defn ^String write-value-as-string
   "Encode a value as a JSON string.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."

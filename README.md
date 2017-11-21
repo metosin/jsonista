@@ -19,15 +19,49 @@ Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while s
 ## Quickstart
 
 ```clojure
-(require '[jsonista.core :as jsonista])
+(require '[jsonista.core :as j])
 
-(jsonista/write-value-as-string {:hello 1})
+(j/write-value-as-string {"hello" 1})
 ;; => "{\"hello\":1}"
 
-(def +data+ (jsonista/write-value-as-string {:foo "bar"}))
+(j/read-value *1)
+;; => {"hello" 1}
+```
 
-(jsonista/read-value +data+)
-;; => {"foo" "bar"}
+## More examples
+
+Changing how map keys are encoded & decoded:
+
+```clojure
+(defn reverse-string [s] (apply str (reverse s)))
+
+(def mapper 
+  (j/object-mapper {:encode-key-fn (comp reverse-string name)
+                    :decode-key-fn (comp keyword reverse-string)}))
+
+(-> {:kikka "kukka"} 
+    (doto prn) 
+    (j/write-value-as-string mapper) 
+    (doto prn) 
+    (j/read-value mapper)
+    (prn))
+; {:kikka "kukka"}
+; "{\"akkik\":\"kukka\"}"
+; {:kikka "kukka"}
+```
+
+Reading & writing directly into a file:
+
+```clojure
+(def file (java.io.File. "hello.json"))
+
+(j/write-value file {"hello" "world"})
+
+(slurp file)
+;; => "{\"hello\":\"world\"}"
+
+(j/read-value file)
+;; => {"hello" "world"}
 ```
 
 ## Performance

@@ -35,9 +35,10 @@ Changing how map keys are encoded & decoded:
 ```clojure
 (defn reverse-string [s] (apply str (reverse s)))
 
-(def mapper 
-  (j/object-mapper {:encode-key-fn (comp reverse-string name)
-                    :decode-key-fn (comp keyword reverse-string)}))
+(def mapper
+  (j/object-mapper 
+    {:encode-key-fn (comp reverse-string name)
+     :decode-key-fn (comp keyword reverse-string)}))
 
 (-> {:kikka "kukka"} 
     (doto prn) 

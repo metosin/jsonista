@@ -10,7 +10,7 @@
   :java-source-paths ["src/java"]
   :plugins [[lein-codox "0.10.3"]
             [lein-virgil "0.1.6"]]
-  :codox {:src-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
+  :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
   :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.2"]

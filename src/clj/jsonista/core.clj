@@ -189,12 +189,12 @@
 ;;
 
 (defn read-value
-  "Decodes a value from a JSON string from anything that
+  "Decodes a value from a JSON from anything that
   satisfies [[ReadValue]] protocol. By default,
   File, URL, String, Reader and InputStream are supported.
 
-  To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
-  See [[object-mapper]] docstring for the available options."
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
   ([object]
    (-read-value object +default-mapper+))
   ([object ^ObjectMapper mapper]
@@ -222,8 +222,8 @@
   "Encode a value as JSON and write using the provided [[WriteValue]] instance.
   By default, File, OutputStream, DataOutput and Writer are supported.
 
-  To configure, pass in an ObjectMapper created with [[object-mapper]], or pass in a map with options.
-  See [[object-mapper]] docstring for the available options."
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
   ([to object]
    (-write-value to object +default-mapper+))
   ([to object ^ObjectMapper mapper]

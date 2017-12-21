@@ -9,8 +9,10 @@ Clojure library for fast JSON encoding and decoding.
 * Uses [Jackson](https://github.com/FasterXML/jackson) directly
 * [API docs](https://metosin.github.io/jsonista/)
 
-Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja).
+Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja). 
 
+Blogged:
+* [Faster JSON processing with jsonista](http://www.metosin.fi/blog/faster-json-processing-with-jsonista/)
 
 ## Latest version
 

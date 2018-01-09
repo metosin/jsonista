@@ -1,4 +1,4 @@
-(defproject metosin/jsonista "0.1.0"
+(defproject metosin/jsonista "0.1.1"
   :description "Clojure library for fast JSON encoding and decoding."
   :url "https://github.com/metosin/jsonista"
   :license {:name "Eclipse Public License"
@@ -13,13 +13,12 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.2"]
-                 [com.fasterxml.jackson.core/jackson-core "2.9.2"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.3"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [criterium "0.4.4"]
                                   [cheshire "5.8.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0-RC1"]]}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}

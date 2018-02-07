@@ -68,8 +68,6 @@
     (java.io InputStream Writer File OutputStream DataOutput Reader ByteArrayInputStream)
     (java.net URL)))
 
-(set! *warn-on-reflection* true)
-
 (defn- clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 

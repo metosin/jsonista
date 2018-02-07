@@ -16,7 +16,8 @@
   :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.3"]]
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
                                   [criterium "0.4.4"]
-                                  [cheshire "5.8.0"]]}
+                                  [cheshire "5.8.0"]]
+                   :global-vars {*warn-on-reflection* true}}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
              :perf {:jvm-opts ^:replace ["-server"

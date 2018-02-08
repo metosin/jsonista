@@ -13,15 +13,15 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.3"]]
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.8.0"]
-                                  [criterium "0.4.4"]
-                                  [cheshire "5.8.0"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.4"]]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0"]
+                                  [cheshire "5.8.0"]
+                                  [criterium "0.4.4"]]
                    :global-vars {*warn-on-reflection* true}}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}
-  :aliases {"all" ["with-profile" "default:dev:default:dev,1.7:default:dev,1.9"]
+  :aliases {"all" ["with-profile" "default:dev:default:dev,1.7:default:dev,1.8"]
             "perf" ["with-profile" "default,dev,perf"]})

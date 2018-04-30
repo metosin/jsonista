@@ -130,12 +130,9 @@
      (.registerModule (JavaTimeModule.))
      (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
              (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII))))
-     (as-> $
-           (if-let [modules (:modules options)]
-             (loop [[module rest] modules, mapper $]
-               (let [mapper (.registerModule mapper module)]
-                 (if (seq rest) (recur rest mapper) mapper)))
-             $))
+     (as-> mapper
+           (doseq [module (:modules options)]
+             (.registerModule mapper module)))
      (.disable SerializationFeature/WRITE_DATES_AS_TIMESTAMPS))))
 
 (def ^ObjectMapper +default-mapper+

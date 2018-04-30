@@ -135,12 +135,9 @@
   (let [mapper (jsonista/object-mapper {:modules [(JodaModule.)]})
         data {:date (LocalDate. 0)}]
     (testing "with defaults"
-      (is (str/starts-with?
-            (jsonista/write-value-as-string data)
-            "{\"date\":{\"yearOfEra\":1970")))
+      (is (str/includes? (jsonista/write-value-as-string data) "\"yearOfEra\":1970")))
     (testing "with installed module"
-      (is (= "{\"date\":\"1970-01-01\"}"
-            (jsonista/write-value-as-string data mapper))))))
+      (is (= "{\"date\":\"1970-01-01\"}" (jsonista/write-value-as-string data mapper))))))
 
 (defrecord StringLike [value])
 

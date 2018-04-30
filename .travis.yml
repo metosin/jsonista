@@ -2,7 +2,6 @@ sudo: false
 language: clojure
 script: lein do clean, all test, all check
 jdk:
-  - openjdk7
   - oraclejdk8
 cache:
   directories:

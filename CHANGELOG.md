@@ -1,5 +1,6 @@
-## UNRELEASED
+## 0.2.0-SNAPSHOT
 
+* **BREAKING**: Requires Java1.8
 * Added support to all `java.time` Classes via `com.fasterxml.jackson.datatype.jsr310/JavaTimeModule`.
 * New `:modules` option for `object-mapper` to setup modules:
 

@@ -10,7 +10,9 @@
            (java.io ByteArrayInputStream InputStreamReader File FileOutputStream RandomAccessFile FileWriter)
            (jsonista.jackson FunctionalSerializer)
            (clojure.lang Keyword ExceptionInfo)
-           (java.time Instant LocalTime LocalDateTime ZoneOffset)))
+           (java.time Instant LocalTime LocalDateTime ZoneOffset)
+           (com.fasterxml.jackson.datatype.joda JodaModule)
+           (org.joda.time LocalDate)))
 
 (set! *warn-on-reflection* true)
 
@@ -128,6 +130,17 @@
 (deftest write-vaue-as-bytes-test
   (is (= (jsonista/write-value-as-string "kikka")
          (String. (jsonista/write-value-as-bytes "kikka")))))
+
+(deftest modules-test
+  (let [mapper (jsonista/object-mapper {:modules [(JodaModule.)]})
+        data {:date (LocalDate. 0)}]
+    (testing "with defaults"
+      (is (str/starts-with?
+            (jsonista/write-value-as-string data)
+            "{\"date\":{\"yearOfEra\":1970")))
+    (testing "with installed module"
+      (is (= "{\"date\":\"1970-01-01\"}"
+            (jsonista/write-value-as-string data mapper))))))
 
 (defrecord StringLike [value])
 

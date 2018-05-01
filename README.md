@@ -5,8 +5,8 @@
 Clojure library for fast JSON encoding and decoding.
 
 * Explicit configuration
-* Embrace Java for speed
-* Uses [Jackson](https://github.com/FasterXML/jackson) directly
+* Uses [jackson-databind](https://github.com/FasterXML/jackson-databind)
+* Mostly written in Java for speed
 * [API docs](https://metosin.github.io/jsonista/)
 
 Much faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja).
@@ -32,7 +32,7 @@ Requires Java1.8+
 ;; => {"hello" 1}
 ```
 
-## More examples
+## Examples
 
 Changing how map keys are encoded & decoded:
 
@@ -69,6 +69,20 @@ Reading & writing directly into a file:
 ;; => {"hello" "world"}
 ```
 
+Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [clj-time](https://github.com/clj-time/clj-time).
+
+```
+;; [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.5"]
+(import '[com.fasterxml.jackson.datatype.joda JodaModule])
+(import '[org.joda.time LocalDate])
+
+(def mapper
+  (j/object-mapper
+    {:modules [(JodaModule.)]}))
+
+(j/write-value-as-string (LocalDate. 0) mapper)
+; "\"1970-01-01\""
+```
 ## Performance
 
 * All standard encoders and decoders are written in Java

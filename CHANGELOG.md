@@ -1,4 +1,4 @@
-## 0.2.0-SNAPSHOT
+## 0.2.0 (2018-05-01)
 
 * **BREAKING**: Requires Java1.8
 * Added support to all `java.time` Classes via `com.fasterxml.jackson.datatype.jsr310/JavaTimeModule`.

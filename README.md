@@ -9,7 +9,7 @@ Clojure library for fast JSON encoding and decoding.
 * Uses [Jackson](https://github.com/FasterXML/jackson) directly
 * [API docs](https://metosin.github.io/jsonista/)
 
-Aiming to be faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja). 
+Much faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja).
 
 Blogged:
 * [Faster JSON processing with jsonista](http://www.metosin.fi/blog/faster-json-processing-with-jsonista/)
@@ -17,6 +17,8 @@ Blogged:
 ## Latest version
 
 [![Clojars Project](http://clojars.org/metosin/jsonista/latest-version.svg)](http://clojars.org/metosin/jsonista)
+
+Requires Java1.8+
 
 ## Quickstart
 
@@ -38,14 +40,14 @@ Changing how map keys are encoded & decoded:
 (defn reverse-string [s] (apply str (reverse s)))
 
 (def mapper
-  (j/object-mapper 
+  (j/object-mapper
     {:encode-key-fn (comp reverse-string name)
      :decode-key-fn (comp keyword reverse-string)}))
 
-(-> {:kikka "kukka"} 
-    (doto prn) 
-    (j/write-value-as-string mapper) 
-    (doto prn) 
+(-> {:kikka "kukka"}
+    (doto prn)
+    (j/write-value-as-string mapper)
+    (doto prn)
     (j/read-value mapper)
     (prn))
 ; {:kikka "kukka"}
@@ -82,6 +84,6 @@ See [perf-tests](/test/jsonista/json_perf_test.clj) for details.
 
 ## License
 
-Copyright &copy; 2016-2017 [Metosin Oy](http://www.metosin.fi).
+Copyright &copy; 2016-2018 [Metosin Oy](http://www.metosin.fi).
 
 Distributed under the Eclipse Public License, the same as Clojure.

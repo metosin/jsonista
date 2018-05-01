@@ -65,8 +65,9 @@
       module.SimpleModule
       SerializationFeature)
     (com.fasterxml.jackson.databind.module SimpleModule)
-    (java.io InputStream Writer File OutputStream DataOutput Reader ByteArrayInputStream)
-    (java.net URL)))
+    (java.io InputStream Writer File OutputStream DataOutput Reader)
+    (java.net URL)
+    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)))
 
 (defn- clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
@@ -103,7 +104,11 @@
   The optional first parameter is a map of options. The following options are
   available:
 
-  | Encoding options                                                     ||
+  | Mapper options      |                                      |
+  | ------------------- | -------------------------------------|
+  | `:modules`          | vector of extra ObjectMapper modules |
+
+  | Encoding options    |                                                   |
   | ------------------- | ------------------------------------------------- |
   | `:pretty`           | set to true use Jacksons pretty-printing defaults |
   | `:escape-non-ascii` | set to true to escape non ascii characters        |
@@ -122,9 +127,13 @@
   ([options]
    (doto (ObjectMapper.)
      (.registerModule (clojure-module options))
+     (.registerModule (JavaTimeModule.))
      (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-             (:escape-non-ascii options) (.enable ^"[Lcom.fasterxml.jackson.core.JsonGenerator$Feature;"
-                                                  (into-array [JsonGenerator$Feature/ESCAPE_NON_ASCII]))))))
+             (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII))))
+     (as-> mapper
+           (doseq [module (:modules options)]
+             (.registerModule mapper module)))
+     (.disable SerializationFeature/WRITE_DATES_AS_TIMESTAMPS))))
 
 (def ^ObjectMapper +default-mapper+
   "The default ObjectMapper instance."
@@ -140,7 +149,7 @@
 (extend-protocol ReadValue
 
   nil
-  (-read-value [this mapper])
+  (-read-value [_ _])
 
   File
   (-read-value [this ^ObjectMapper mapper]
@@ -211,6 +220,7 @@
   "Encode a value as a JSON byte-array.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  {:tag 'bytes}
   ([object]
    (.writeValueAsBytes +default-mapper+ object))
   ([object ^ObjectMapper mapper]

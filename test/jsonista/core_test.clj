@@ -8,9 +8,11 @@
            (java.sql Timestamp)
            (com.fasterxml.jackson.core JsonGenerator)
            (java.io ByteArrayInputStream InputStreamReader File FileOutputStream RandomAccessFile FileWriter)
-           (jsonista.jackson KeywordSerializer FunctionalSerializer)
+           (jsonista.jackson FunctionalSerializer)
            (clojure.lang Keyword ExceptionInfo)
-           (com.fasterxml.jackson.databind JsonSerializer)))
+           (java.time Instant LocalTime LocalDateTime ZoneOffset)
+           (com.fasterxml.jackson.datatype.joda JodaModule)
+           (org.joda.time LocalDate)))
 
 (set! *warn-on-reflection* true)
 
@@ -76,8 +78,11 @@
               :java-set (doto (java.util.HashSet.) (.add 1) (.add 2) (.add 3))
               :java-map (doto (java.util.HashMap.) (.put :foo "bar"))
               :java-list (doto (java.util.ArrayList.) (.add 1) (.add 2) (.add 3))
-              :date (Date. 0)
-              :timestamp (Timestamp. 0)}
+              :dates {:date (Date. 0)
+                      :timestamp (Timestamp. 0)
+                      :instant (Instant/ofEpochMilli 0)
+                      :local-time (LocalTime/ofNanoOfDay 0)
+                      :local-date-time (LocalDateTime/ofEpochSecond 0 0 ZoneOffset/UTC)}}
         expected {:numbers {:integer 1
                             :long 2
                             :double 1.2
@@ -102,15 +107,37 @@
                   :java-set [1 2 3]
                   :java-map {:foo "bar"}
                   :java-list [1 2 3]
-                  :date "1970-01-01T00:00:00Z"
-                  :timestamp "1970-01-01T00:00:00Z"}]
+                  :dates {:date "1970-01-01T00:00:00Z"
+                          :timestamp "1970-01-01T00:00:00Z"
+                          :instant "1970-01-01T00:00:00Z"
+                          :local-time "00:00:00"
+                          :local-date-time "1970-01-01T00:00:00"}}
+        without-java-time #(update % :dates dissoc :instant :local-time :local-date-time)]
 
     (testing "cheshire"
-      (is (= expected (cheshire/parse-string (cheshire/generate-string data) true))))
+      (testing "fails with java-time"
+        (is (thrown? Exception (cheshire/generate-string data))))
+      (testing "parses others nicely"
+        (is (= (without-java-time expected)
+               (cheshire/parse-string (cheshire/generate-string (without-java-time data)) true)))))
 
     (testing "jsonista"
-      (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data)))
+      (testing "works like cheshire"
+        (let [data (without-java-time data)]
+          (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data)))))
       (is (= expected (jsonista/read-value (jsonista/write-value-as-string data) +kw-mapper+))))))
+
+(deftest write-vaue-as-bytes-test
+  (is (= (jsonista/write-value-as-string "kikka")
+         (String. (jsonista/write-value-as-bytes "kikka")))))
+
+(deftest modules-test
+  (let [mapper (jsonista/object-mapper {:modules [(JodaModule.)]})
+        data {:date (LocalDate. 0)}]
+    (testing "with defaults"
+      (is (str/includes? (jsonista/write-value-as-string data) "\"yearOfEra\":1970")))
+    (testing "with installed module"
+      (is (= "{\"date\":\"1970-01-01\"}" (jsonista/write-value-as-string data mapper))))))
 
 (defrecord StringLike [value])
 

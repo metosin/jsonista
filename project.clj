@@ -18,7 +18,8 @@
   :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0"]
                                   [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.5"]
                                   [cheshire "5.8.0"]
-                                  [criterium "0.4.4"]]}
+                                  [criterium "0.4.4"]]
+                   :global-vars {*warn-on-reflection* true}}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"

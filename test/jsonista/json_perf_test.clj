@@ -30,17 +30,17 @@
 
 (defn encode-perf []
 
-  ;; 1220ns
+  ;; 1160ns
   (title "encode: cheshire")
   (assert (= +json+ (cheshire/generate-string {"hello" "world"})))
   (cc/quick-bench (cheshire/generate-string {"hello" "world"}))
 
-  ;; 200ns
+  ;; 224ns
   (title "encode: jsonista")
   (assert (= +json+ (json/write-value-as-string {"hello" "world"})))
   (cc/quick-bench (json/write-value-as-string {"hello" "world"}))
 
-  ;; 110ns
+  ;; 116ns
   (title "encode: str")
   (let [encode (fn [key value] (str "{\"" key "\":\"" value "\"}"))]
     (assert (= +json+ (encode "hello" "world")))
@@ -48,17 +48,17 @@
 
 (defn decode-perf []
 
-  ;; 920ns
+  ;; 910ns
   (title "decode: cheshire")
   (assert (= +data+ (cheshire/parse-string-strict +json+)))
   (cc/quick-bench (cheshire/parse-string-strict +json+))
 
-  ;; 412ns
+  ;; 390ns
   (title "decode: jsonista")
   (assert (= +data+ (json/read-value +json+)))
   (cc/quick-bench (json/read-value +json+))
 
-  ;; 260ns
+  ;; 230ns
   (title "decode: jackson")
   (let [mapper (ObjectMapper.)
         decode (fn [] (.readValue mapper +json+ Map))]
@@ -76,20 +76,20 @@
 
     (title file)
 
-    ;  1.2µs (10b)
-    ;  3.0µs (100b)
-    ; 12.6µs (1k)
-    ;  134µs (10k)
-    ; 1290µs (100k)
+    ;  1.1µs (10b)
+    ;  2.9µs (100b)
+    ; 11.7µs (1k)
+    ;  125µs (10k)
+    ; 1230µs (100k)
     (title "encode: cheshire")
     (assert (= json (cheshire/generate-string data)))
     (cc/quick-bench (cheshire/generate-string data))
 
-    ; 0.23µs (10b)
-    ; 0.58µs (100b)
-    ;  3.3µs (1k)
-    ;   36µs (10k)
-    ;  380µs (100k)
+    ; 0.17µs (10b)
+    ; 0.50µs (100b)
+    ;  2.8µs (1k)
+    ;   29µs (10k)
+    ;  338µs (100k)
     (title "encode: jsonista")
     (assert (= json (json/write-value-as-string data)))
     (cc/quick-bench (json/write-value-as-string data))))
@@ -106,19 +106,19 @@
     (title file)
 
     ;  1.0µs (10b)
-    ;  2.2µs (100b)
-    ;  9.3µs (1k)
-    ;  106µs (10k)
-    ; 1010µs (100k)
+    ;  1.9µs (100b)
+    ;  9.2µs (1k)
+    ;  102µs (10k)
+    ;  990µs (100k)
     (title "decode: cheshire")
     (assert (= data (cheshire/parse-string json)))
     (cc/quick-bench (cheshire/parse-string json))
 
     ; 0.40µs (10b)
-    ;  1.6µs (100b)
-    ;  7.8µs (1k)
-    ;   84µs (10k)
-    ;  806µs (100k)
+    ;  1.5µs (100b)
+    ;  7.1µs (1k)
+    ;   77µs (10k)
+    ;  760µs (100k)
     (title "decode: jsonista")
     (assert (= data (json/read-value json)))
     (cc/quick-bench (json/read-value json))))

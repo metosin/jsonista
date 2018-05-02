@@ -1,7 +1,7 @@
 package jsonista.jackson;
 
 import clojure.lang.ITransientMap;
-import clojure.lang.PersistentHashMap;
+import clojure.lang.PersistentArrayMap;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -23,7 +23,7 @@ public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, O
   @Override
   @SuppressWarnings("unchecked")
   public Map<String, Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-    ITransientMap t = PersistentHashMap.EMPTY.asTransient();
+    ITransientMap t = PersistentArrayMap.EMPTY.asTransient();
     JavaType object = ctxt.constructType(Object.class);
     KeyDeserializer keyDeser = ctxt.findKeyDeserializer(object, null);
     JsonDeserializer<Object> valueDeser = ctxt.findNonContextualValueDeserializer(object);

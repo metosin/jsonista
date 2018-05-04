@@ -65,6 +65,12 @@
     (assert (= +data+ (decode)))
     (cc/quick-bench (decode))))
 
+(defn minify
+  "drops extra keys from data to test PAM vs PHM differences"
+  [data]
+  (cond-> data
+          (data "results") (update data "results" (partial map #(dissoc % "picture" "login" "cell" "dob" "email" "gender" "registered")))))
+
 (defn encode-perf-different-sizes []
   (doseq [file ["dev-resources/json10b.json"
                 "dev-resources/json100b.json"

@@ -2,7 +2,7 @@
   (:require [criterium.core :as cc]
             [clojure.test :refer :all]
             [jsonista.test-utils :refer :all]
-            [jsonista.core :as json]
+            [jsonista.core :as j]
             [cheshire.core :as cheshire])
   (:import (com.fasterxml.jackson.databind ObjectMapper)
            (java.util Map)))
@@ -37,8 +37,8 @@
 
   ;; 224ns
   (title "encode: jsonista")
-  (assert (= +json+ (json/write-value-as-string {"hello" "world"})))
-  (cc/quick-bench (json/write-value-as-string {"hello" "world"}))
+  (assert (= +json+ (j/write-value-as-string {"hello" "world"})))
+  (cc/quick-bench (j/write-value-as-string {"hello" "world"}))
 
   ;; 116ns
   (title "encode: str")
@@ -55,8 +55,8 @@
 
   ;; 390ns
   (title "decode: jsonista")
-  (assert (= +data+ (json/read-value +json+)))
-  (cc/quick-bench (json/read-value +json+))
+  (assert (= +data+ (j/read-value +json+)))
+  (cc/quick-bench (j/read-value +json+))
 
   ;; 230ns
   (title "decode: jackson")
@@ -97,8 +97,8 @@
     ;   29µs (10k)
     ;  338µs (100k)
     (title "encode: jsonista")
-    (assert (= json (json/write-value-as-string data)))
-    (cc/quick-bench (json/write-value-as-string data))))
+    (assert (= json (j/write-value-as-string data)))
+    (cc/quick-bench (j/write-value-as-string data))))
 
 (defn decode-perf-different-sizes []
   (doseq [file ["dev-resources/json10b.json"
@@ -126,8 +126,8 @@
     ;   77µs (10k)
     ;  760µs (100k)
     (title "decode: jsonista")
-    (assert (= data (json/read-value json)))
-    (cc/quick-bench (json/read-value json))))
+    (assert (= data (j/read-value json)))
+    (cc/quick-bench (j/read-value json))))
 
 (comment
   (encode-perf)

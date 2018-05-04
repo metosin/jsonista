@@ -1,6 +1,6 @@
 (ns jsonista.core-test
   (:require [clojure.test :refer [deftest is testing]]
-            [jsonista.core :as jsonista]
+            [jsonista.core :as j]
             [cheshire.core :as cheshire]
             [cheshire.generate :as generate]
             [clojure.string :as str])
@@ -16,42 +16,42 @@
 
 (set! *warn-on-reflection* true)
 
-(defn stays-same? [x] (= x (-> x jsonista/write-value-as-string jsonista/read-value)))
+(defn stays-same? [x] (= x (-> x j/write-value-as-string j/read-value)))
 
-(defn make-canonical [x] (-> x jsonista/read-value jsonista/write-value-as-string))
+(defn make-canonical [x] (-> x j/read-value j/write-value-as-string))
 (defn canonical= [x y] (= (make-canonical x) (make-canonical y)))
 
-(def +kw-mapper+ (jsonista/object-mapper {:decode-key-fn true}))
-(def +upper-mapper+ (jsonista/object-mapper {:decode-key-fn str/upper-case}))
-(def +string-mapper+ (jsonista/object-mapper {:decode-key-fn false}))
+(def +kw-mapper+ (j/object-mapper {:decode-key-fn true}))
+(def +upper-mapper+ (j/object-mapper {:decode-key-fn str/upper-case}))
+(def +string-mapper+ (j/object-mapper {:decode-key-fn false}))
 
 (deftest simple-roundrobin-test
   (is (stays-same? {"hello" "world"}))
   (is (stays-same? [1 2 3]))
-  (is (= "0.75" (jsonista/write-value-as-string 3/4))))
+  (is (= "0.75" (j/write-value-as-string 3/4))))
 
 (deftest test-nil
-  (is (nil? (jsonista/read-value nil)))
-  (is (= "null" (jsonista/write-value-as-string nil))))
+  (is (nil? (j/read-value nil)))
+  (is (= "null" (j/write-value-as-string nil))))
 
 (deftest options-tests
   (let [data {:hello "world"}]
     (testing ":decode-key-fn"
-      (is (= {"hello" "world"} (-> data jsonista/write-value-as-string jsonista/read-value)))
-      (is (= {:hello "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +kw-mapper+))))
-      (is (= {"hello" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +string-mapper+))))
-      (is (= {"HELLO" "world"} (-> data (jsonista/write-value-as-string) (jsonista/read-value +upper-mapper+)))))
+      (is (= {"hello" "world"} (-> data j/write-value-as-string j/read-value)))
+      (is (= {:hello "world"} (-> data (j/write-value-as-string) (j/read-value +kw-mapper+))))
+      (is (= {"hello" "world"} (-> data (j/write-value-as-string) (j/read-value +string-mapper+))))
+      (is (= {"HELLO" "world"} (-> data (j/write-value-as-string) (j/read-value +upper-mapper+)))))
     (testing ":encode-key-fn"
       (let [data {:hello "world"}]
-        (is (= "{\"hello\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn true}))))
-        (is (= "{\":hello\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn false}))))
-        (is (= "{\"HELLO\":\"world\"}" (jsonista/write-value-as-string data (jsonista/object-mapper {:encode-key-fn (comp str/upper-case name)}))))))
+        (is (= "{\"hello\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn true}))))
+        (is (= "{\":hello\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn false}))))
+        (is (= "{\"HELLO\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn (comp str/upper-case name)}))))))
     (testing ":pretty"
-      (is (= "{\n  \"hello\" : \"world\"\n}" (jsonista/write-value-as-string data (jsonista/object-mapper {:pretty true})))))
+      (is (= "{\n  \"hello\" : \"world\"\n}" (j/write-value-as-string data (j/object-mapper {:pretty true})))))
     (testing ":escape-non-ascii"
-      (is (= "{\"imperial-money\":\"\\u00A3\"}" (jsonista/write-value-as-string {:imperial-money "£"} (jsonista/object-mapper {:escape-non-ascii true})))))
+      (is (= "{\"imperial-money\":\"\\u00A3\"}" (j/write-value-as-string {:imperial-money "£"} (j/object-mapper {:escape-non-ascii true})))))
     (testing ":date-format"
-      (is (= "{\"mmddyyyy\":\"00-01-70\"}" (jsonista/write-value-as-string {:mmddyyyy (Date. 0)} (jsonista/object-mapper {:date-format "mm-dd-yy"})))))))
+      (is (= "{\"mmddyyyy\":\"00-01-70\"}" (j/write-value-as-string {:mmddyyyy (Date. 0)} (j/object-mapper {:date-format "mm-dd-yy"})))))))
 
 (deftest roundrobin-tests
   (let [data {:numbers {:integer (int 1)
@@ -124,20 +124,20 @@
     (testing "jsonista"
       (testing "works like cheshire"
         (let [data (without-java-time data)]
-          (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data)))))
-      (is (= expected (jsonista/read-value (jsonista/write-value-as-string data) +kw-mapper+))))))
+          (is (canonical= (cheshire/generate-string data) (j/write-value-as-string data)))))
+      (is (= expected (j/read-value (j/write-value-as-string data) +kw-mapper+))))))
 
 (deftest write-vaue-as-bytes-test
-  (is (= (jsonista/write-value-as-string "kikka")
-         (String. (jsonista/write-value-as-bytes "kikka")))))
+  (is (= (j/write-value-as-string "kikka")
+         (String. (j/write-value-as-bytes "kikka")))))
 
 (deftest modules-test
-  (let [mapper (jsonista/object-mapper {:modules [(JodaModule.)]})
+  (let [mapper (j/object-mapper {:modules [(JodaModule.)]})
         data {:date (LocalDate. 0 DateTimeZone/UTC)}]
     (testing "with defaults"
-      (is (str/includes? (jsonista/write-value-as-string data) "\"yearOfEra\":1970")))
+      (is (str/includes? (j/write-value-as-string data) "\"yearOfEra\":1970")))
     (testing "with installed module"
-      (is (= "{\"date\":\"1970-01-01\"}" (jsonista/write-value-as-string data mapper))))))
+      (is (= "{\"date\":\"1970-01-01\"}" (j/write-value-as-string data mapper))))))
 
 (defrecord StringLike [value])
 
@@ -150,8 +150,8 @@
 (deftest custom-encoders
   (let [data {:like (StringLike. "boss")}
         expected {:like "boss"}
-        mapper (jsonista/object-mapper {:decode-key-fn true
-                                        :encoders {StringLike serialize-stringlike}})]
+        mapper (j/object-mapper {:decode-key-fn true
+                                 :encoders {StringLike serialize-stringlike}})]
 
     (testing "cheshire"
       (is (= expected (cheshire/parse-string
@@ -159,20 +159,20 @@
                         true))))
 
     (testing "jsonista"
-      (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
-      (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))
+      (is (canonical= (cheshire/generate-string data) (j/write-value-as-string data mapper)))
+      (is (= expected (-> data (j/write-value-as-string mapper) (j/read-value mapper)))))
 
     (testing "using JsonSerializer instances"
-      (let [mapper (jsonista/object-mapper {:decode-key-fn true
-                                            :encoders {StringLike (FunctionalSerializer. serialize-stringlike)}})]
-        (is (canonical= (cheshire/generate-string data) (jsonista/write-value-as-string data mapper)))
-        (is (= expected (-> data (jsonista/write-value-as-string mapper) (jsonista/read-value mapper)))))))
+      (let [mapper (j/object-mapper {:decode-key-fn true
+                                     :encoders {StringLike (FunctionalSerializer. serialize-stringlike)}})]
+        (is (canonical= (cheshire/generate-string data) (j/write-value-as-string data mapper)))
+        (is (= expected (-> data (j/write-value-as-string mapper) (j/read-value mapper)))))))
 
   (testing "invalid encoder can't be registered"
     (is (thrown-with-msg?
           ExceptionInfo
           #"Can't register encoder 123 for type class clojure.lang.Keyword"
-          (jsonista/object-mapper {:encoders {Keyword 123}})))))
+          (j/object-mapper {:encoders {Keyword 123}})))))
 
 (defn- str->input-stream [^String x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
 
@@ -180,49 +180,50 @@
 
 (deftest read-value-types
   (let [original {"ok" 1}
-        input-string (jsonista/write-value-as-string original)
+        input-string (j/write-value-as-string original)
         file (tmp-file)]
     (spit file input-string)
 
     (testing "nil"
-      (is (= nil (jsonista/read-value nil))))
+      (is (= nil (j/read-value nil))))
 
     (testing "File"
-      (is (= original (jsonista/read-value file))))
+      (is (= original (j/read-value file))))
 
     (testing "URL"
-      (is (= original (jsonista/read-value (.toURL file)))))
+      (is (= original (j/read-value (.toURL file)))))
 
     (testing "String"
-      (is (= original (jsonista/read-value input-string))))
+      (is (= original (j/read-value input-string))))
 
     (testing "InputStream"
-      (is (= original (jsonista/read-value (str->input-stream input-string)))))
+      (is (= original (j/read-value (str->input-stream input-string)))))
 
     (testing "Reader"
-      (is (= original (jsonista/read-value (InputStreamReader. (str->input-stream input-string))))))))
+      (is (= original (j/read-value (InputStreamReader. (str->input-stream input-string))))))))
 
 (deftest write-value-types
   (let [original {"ok" 1}
-        expected (jsonista/write-value-as-string original)
+        expected (j/write-value-as-string original)
         file (tmp-file)]
 
     (testing "File"
-      (jsonista/write-value file original)
+      (j/write-value file original)
       (is (= expected (slurp file)))
       (.delete file))
 
     (testing "OutputStream"
-      (jsonista/write-value (FileOutputStream. file) original)
+      (j/write-value (FileOutputStream. file) original)
       (is (= expected (slurp file)))
       (.delete file))
 
     (testing "DataOutput"
-      (jsonista/write-value (RandomAccessFile. file "rw") original)
+      (j/write-value (RandomAccessFile. file "rw") original)
       (is (= expected (slurp file)))
       (.delete file))
 
     (testing "Writer"
-      (jsonista/write-value (FileWriter. file) original)
+      (j/write-value (FileWriter. file) original)
       (is (= expected (slurp file)))
       (.delete file))))
+

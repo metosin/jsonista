@@ -12,7 +12,7 @@
            (clojure.lang Keyword ExceptionInfo)
            (java.time Instant LocalTime LocalDateTime ZoneOffset)
            (com.fasterxml.jackson.datatype.joda JodaModule)
-           (org.joda.time LocalDate)))
+           (org.joda.time LocalDate DateTimeZone)))
 
 (set! *warn-on-reflection* true)
 
@@ -133,7 +133,7 @@
 
 (deftest modules-test
   (let [mapper (jsonista/object-mapper {:modules [(JodaModule.)]})
-        data {:date (LocalDate. 0)}]
+        data {:date (LocalDate. 0 DateTimeZone/UTC)}]
     (testing "with defaults"
       (is (str/includes? (jsonista/write-value-as-string data) "\"yearOfEra\":1970")))
     (testing "with installed module"

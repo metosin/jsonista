@@ -71,7 +71,7 @@ Reading & writing directly into a file:
 
 Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [clj-time](https://github.com/clj-time/clj-time).
 
-```
+```clj
 ;; [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.5"]
 (import '[com.fasterxml.jackson.datatype.joda JodaModule])
 (import '[org.joda.time LocalDate])

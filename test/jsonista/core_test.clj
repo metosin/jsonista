@@ -139,6 +139,13 @@
     (testing "with installed module"
       (is (= "{\"date\":\"1970-01-01\"}" (j/write-value-as-string data mapper))))))
 
+(deftest bigdecimals-test
+  (let [get-class #(-> "{\"value\": 0.2}" (j/read-value %) (get "value") class)]
+    (testing "by default, doubles are used"
+      (is (= Double (get-class j/+default-mapper+))))
+    (testing ":bigdecimals"
+      (is (= BigDecimal (get-class (j/object-mapper {:bigdecimals true})))))))
+
 (defrecord StringLike [value])
 
 (defn serialize-stringlike

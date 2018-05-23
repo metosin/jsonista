@@ -63,7 +63,7 @@
       JsonSerializer
       ObjectMapper
       module.SimpleModule
-      SerializationFeature)
+      SerializationFeature DeserializationFeature)
     (com.fasterxml.jackson.databind.module SimpleModule)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)
@@ -122,13 +122,15 @@
 
   | Decoding options    |                                                                |
   | ------------------- | -------------------------------------------------------------- |
-  | `:decode-key-fn`    |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |"
+  | `:decode-key-fn`    |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
+  | `:bigdecimals`      |  true to decode doubles as BigDecimals (default: false) |"
   ([] (object-mapper {}))
   ([options]
    (doto (ObjectMapper.)
      (.registerModule (clojure-module options))
      (.registerModule (JavaTimeModule.))
      (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+             (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
              (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII))))
      (as-> mapper
            (doseq [module (:modules options)]

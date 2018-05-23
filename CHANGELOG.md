@@ -1,3 +1,7 @@
+## 0.2.1-SNAPSHOT
+
+* Add support for `:bigdecimals` option in `object-mapper` to parse floats into `BigDecimal` instead of `Double`
+
 ## 0.2.0 (2018-05-01)
 
 * **BREAKING**: Requires Java1.8

@@ -1,4 +1,4 @@
-## 0.2.1-SNAPSHOT
+## 0.2.1 (2017-05-23)
 
 * Add support for `:bigdecimals` option in `object-mapper` to parse floats into `BigDecimal` instead of `Double`
 

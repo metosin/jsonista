@@ -1,4 +1,13 @@
-## 0.2.1 (2017-05-23)
+## 0.2.2 (2018-09-22)
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-databind "2.9.7"] is available but we use "2.9.5"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.9.7"] is available but we use "2.9.5"
+```
+
+## 0.2.1 (2018-05-23)
 
 * Add support for `:bigdecimals` option in `object-mapper` to parse floats into `BigDecimal` instead of `Double`
 

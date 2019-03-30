@@ -150,6 +150,10 @@
 
 (extend-protocol ReadValue
 
+  (Class/forName "[B")
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper ^bytes this ^Class Object))
+
   nil
   (-read-value [_ _])
 

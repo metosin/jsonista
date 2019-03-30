@@ -194,6 +194,9 @@
     (testing "nil"
       (is (= nil (j/read-value nil))))
 
+    (testing "byte-array"
+      (is (= original (j/read-value (j/write-value-as-bytes original)))))
+
     (testing "File"
       (is (= original (j/read-value file))))
 

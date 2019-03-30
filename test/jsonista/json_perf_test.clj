@@ -3,9 +3,11 @@
             [clojure.test :refer :all]
             [jsonista.test-utils :refer :all]
             [jsonista.core :as j]
-            [cheshire.core :as cheshire])
+            [cheshire.core :as cheshire]
+            [cognitect.transit :as transit])
   (:import (com.fasterxml.jackson.databind ObjectMapper)
-           (java.util Map)))
+           (java.util Map)
+           (java.io ByteArrayOutputStream ByteArrayInputStream)))
 
 (set! *warn-on-reflection* true)
 
@@ -134,3 +136,64 @@
   (decode-perf)
   (encode-perf-different-sizes)
   (decode-perf-different-sizes))
+
+;;
+;; transit in-process round-robin
+;;
+
+(defn ->transit [data]
+  (let [out (ByteArrayOutputStream. 4096)
+        writer (transit/writer out :json)]
+    (transit/write writer data)
+    (.toByteArray out)))
+
+(defn <-transit [bytes]
+  (let [in (ByteArrayInputStream. bytes)
+        reader (transit/reader in :json)]
+    (transit/read reader)))
+
+(defn ->json [data]
+  (j/write-value-as-bytes data))
+
+(defn <-json [bytes]
+  (j/read-value bytes))
+
+(defn encode-decode-transit-jsonista-different-sizes []
+  (doseq [file ["dev-resources/json10b.json"
+                "dev-resources/json100b.json"
+                "dev-resources/json1k.json"
+                "dev-resources/json10k.json"
+                "dev-resources/json100k.json"]
+          :let [data (cheshire/parse-string (slurp file))]]
+
+    (title file)
+
+    (println data)
+    (println (-> data ->transit <-transit))
+    (println (-> data ->json <-json))
+
+    (assert
+      (= data
+         (-> data ->transit <-transit)
+         (-> data ->json <-json)))
+
+    ;  6.8µs (10b)
+    ; 14.8µs (100b)
+    ; 25.6µs (1k)
+    ;  252µs (10k)
+    ; 1760µs (100k)
+    (title "encode-decode: transit")
+    (cc/quick-bench
+      (-> data ->transit <-transit))
+
+    ; 0.52µs (10b)
+    ; 2.50µs (100b)
+    ; 10.0µs (1k)
+    ;  100µs (10k)
+    ; 1300µs (100k)
+    (title "encode-decode: jsonista")
+    (cc/quick-bench
+      (-> data ->json <-json))))
+
+(comment
+  (encode-decode-transit-jsonista-different-sizes))

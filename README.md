@@ -1,4 +1,4 @@
-# jsonista [![Continuous Integration status](https://secure.travis-ci.org/metosin/jsonista.png)](http://travis-ci.org/metosin/jsonista) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/jsonista)](https://cljdoc.xyz/d/metosin/jsonista/CURRENT)
+# jsonista [![Continuous Integration status](https://img.shields.io/travis/metosin/jsonista.svg)](http://travis-ci.org/metosin/jsonista) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/jsonista)](https://cljdoc.xyz/d/metosin/jsonista/CURRENT)
 
 > *jsonissa / jsonista / jsoniin, jsonilla / jsonilta / jsonille*
 

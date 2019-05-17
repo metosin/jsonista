@@ -1,4 +1,4 @@
-(defproject metosin/jsonista "0.2.2"
+(defproject metosin/jsonista "0.2.3-SNAPSHOT"
   :description "Clojure library for fast JSON encoding and decoding."
   :url "https://github.com/metosin/jsonista"
   :license {:name "Eclipse Public License"
@@ -6,8 +6,7 @@
   :source-paths ["src/clj"]
   :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
   :java-source-paths ["src/java"]
-  :plugins [[lein-codox "0.10.6"]
-            [lein-virgil "0.1.9"]]
+  :plugins [[lein-codox "0.10.6"]]
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
@@ -19,10 +18,12 @@
                                   [com.cognitect/transit-clj "0.8.313"]
                                   [criterium "0.4.4"]]
                    :global-vars {*warn-on-reflection* true}}
+             :virgil {:plugins [[lein-virgil "0.1.9"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :1.10 {:dependencies [[org.clojure/clojure "1.10.0"]]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}
   :aliases {"all" ["with-profile" "default:dev:default:dev,1.8:dev,1.10"]
-            "perf" ["with-profile" "default,dev,perf"]})
+            "perf" ["with-profile" "default,dev,perf"]
+            "repl" ["with-profile" "default,dev,virgil" "repl"]})

@@ -10,13 +10,13 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.8"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.9.8"]]
-  :profiles {:dev {:dependencies [[org.clojure/clojure "1.9.0"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.8"]
+  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.9"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.9.9"]]
+  :profiles {:dev {:dependencies [[org.clojure/clojure "1.10.1"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.9"]
                                   [cheshire "5.8.1"]
                                   [com.cognitect/transit-clj "0.8.313"]
-                                  [criterium "0.4.4"]]
+                                  [criterium "0.4.5"]]
                    :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}

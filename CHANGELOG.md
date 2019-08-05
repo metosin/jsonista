@@ -1,3 +1,11 @@
+## 0.2.4 (2019-08-05)
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-databind "2.9.9.1"] is available but we use "2.9.9"
+```
+
 ## 0.2.3 (2019-06-08)
 
 * `read-value` supports now `byte-array`.

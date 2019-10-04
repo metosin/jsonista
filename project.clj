@@ -6,18 +6,18 @@
   :source-paths ["src/clj"]
   :javac-options ["-Xlint:unchecked" "-target" "1.7" "-source" "1.7"]
   :java-source-paths ["src/java"]
-  :plugins [[lein-codox "0.10.6"]]
+  :plugins [[lein-codox "0.10.7"]]
   :deploy-repositories [["releases" :clojars]]
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.9.9.1"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.9.9"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-databind "2.10.0"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.10.0"]]
   :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.1"]]}
              :dev      {:dependencies [[org.clojure/clojure "1.10.1"]
-                                       [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.9"]
-                                       [cheshire "5.8.1"]
-                                       [com.cognitect/transit-clj "0.8.313"]
+                                       [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.10.0"]
+                                       [cheshire "5.9.0"]
+                                       [com.cognitect/transit-clj "0.8.319"]
                                        [criterium "0.4.5"]]
                         :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}

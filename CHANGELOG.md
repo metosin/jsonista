@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.2.5 (2019-09-04)
 
 * Updated deps:
 

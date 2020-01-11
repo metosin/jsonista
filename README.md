@@ -8,6 +8,7 @@ Clojure library for fast JSON encoding and decoding.
 * Uses [jackson-databind](https://github.com/FasterXML/jackson-databind)
 * Mostly written in Java for speed
 * [API docs](https://metosin.github.io/jsonista/)
+* [FAQ](./docs/faq.md)
 
 Much faster than [Cheshire](https://github.com/dakrone/cheshire) while still having all the necessary features for web development. Designed for use with [Muuntaja](https://github.com/metosin/muuntaja).
 

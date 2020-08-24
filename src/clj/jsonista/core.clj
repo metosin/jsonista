@@ -127,8 +127,8 @@
   ([] (object-mapper {}))
   ([options]
    (doto (ObjectMapper.)
-     (.registerModule (clojure-module options))
      (.registerModule (JavaTimeModule.))
+     (.registerModule (clojure-module options))
      (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
              (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
              (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII))))

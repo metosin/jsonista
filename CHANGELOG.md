@@ -1,3 +1,16 @@
+## NEW
+
+* Fix [#33](https://github.com/metosin/jsonista/issues/33)
+* Add empty `deps.edn`
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.11.2"] is available but we use "2.11.0"
+[com.fasterxml.jackson.core/jackson-databind "2.11.2"] is available but we use "2.11.0"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.11.2"] is available but we use "2.11.0"
+```
+
 ## 0.2.6 (2020-05-05)
 
 * Updated deps:

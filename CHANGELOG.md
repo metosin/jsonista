@@ -1,6 +1,17 @@
-## NEW
+## 0.2.7 (2020-08-25)
 
 * Fix [#33](https://github.com/metosin/jsonista/issues/33)
+* Deprecate `jsonista.core/+default-mapper`
+  * `jsonista.core/default-object-mapper` for defaults
+  * `jsonista.core/keyword-keys-object-mapper` for encoding & decoding keys into keywords
+
+```clj
+(-> {:dog {:name "Teppo"}}
+    (j/write-value-as-bytes j/keyword-keys-object-mapper)
+    (j/read-value j/keyword-keys-object-mapper))
+;; => {:dog {:name "Teppo"}}
+```
+
 * Add empty `deps.edn`
 
 * Updated deps:

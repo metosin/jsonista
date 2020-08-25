@@ -99,6 +99,6 @@ See [perf-tests](/test/jsonista/json_perf_test.clj) for details.
 
 ## License
 
-Copyright &copy; 2016-2018 [Metosin Oy](http://www.metosin.fi).
+Copyright &copy; 2016-2020 [Metosin Oy](http://www.metosin.fi).
 
 Distributed under the Eclipse Public License 2.0.

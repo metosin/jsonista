@@ -39,11 +39,13 @@
     (testing ":decode-key-fn"
       (is (= {"hello" "world"} (-> data j/write-value-as-string j/read-value)))
       (is (= {:hello "world"} (-> data (j/write-value-as-string) (j/read-value +kw-mapper+))))
+      (is (= {:hello "world"} (-> data (j/write-value-as-string) (j/read-value j/keyword-keys-object-mapper))))
       (is (= {"hello" "world"} (-> data (j/write-value-as-string) (j/read-value +string-mapper+))))
       (is (= {"HELLO" "world"} (-> data (j/write-value-as-string) (j/read-value +upper-mapper+)))))
     (testing ":encode-key-fn"
       (let [data {:hello "world"}]
         (is (= "{\"hello\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn true}))))
+        (is (= "{\"hello\":\"world\"}" (j/write-value-as-string data j/keyword-keys-object-mapper)))
         (is (= "{\":hello\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn false}))))
         (is (= "{\"HELLO\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn (comp str/upper-case name)}))))))
     (testing ":pretty"
@@ -125,7 +127,7 @@
       (testing "works like cheshire"
         (let [data (without-java-time data)]
           (is (canonical= (cheshire/generate-string data) (j/write-value-as-string data)))))
-      (is (= expected (j/read-value (j/write-value-as-string data) +kw-mapper+))))))
+      (is (= expected (j/read-value (j/write-value-as-string data) j/keyword-keys-object-mapper))))))
 
 (deftest write-vaue-as-bytes-test
   (is (= (j/write-value-as-string "kikka")
@@ -142,7 +144,7 @@
 (deftest bigdecimals-test
   (let [get-class #(-> "{\"value\": 0.2}" (j/read-value %) (get "value") class)]
     (testing "by default, doubles are used"
-      (is (= Double (get-class j/+default-mapper+))))
+      (is (= Double (get-class j/default-object-mapper))))
     (testing ":bigdecimals"
       (is (= BigDecimal (get-class (j/object-mapper {:bigdecimals true})))))))
 

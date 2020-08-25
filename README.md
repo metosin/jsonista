@@ -35,6 +35,24 @@ Requires Java1.8+
 
 ## Examples
 
+Using explicit ObjectMapper:
+
+```clj
+(-> {:dog {:name "Teppo"}}
+    (j/write-value-as-bytes j/default-object-mapper)
+    (j/read-value j/default-object-mapper))
+;; => {"dog" {"name" "Teppo"}}
+```
+
+Using keyword keys:
+
+```clj
+(-> {:dog {:name "Teppo"}}
+    (j/write-value-as-bytes j/keyword-keys-object-mapper)
+    (j/read-value j/keyword-keys-object-mapper))
+;; => {:dog {:name "Teppo"}}
+```
+
 Changing how map keys are encoded & decoded:
 
 ```clojure

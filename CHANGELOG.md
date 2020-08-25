@@ -1,6 +1,6 @@
 ## 0.2.7 (2020-08-25)
 
-* Fix [#33](https://github.com/metosin/jsonista/issues/33)
+* Fix [#33](https://github.com/metosin/jsonista/issues/33): "Cannot set a custom java.time.LocalTime encoder"
 * Deprecate `jsonista.core/+default-mapper`
   * `jsonista.core/default-object-mapper` for defaults
   * `jsonista.core/keyword-keys-object-mapper` for encoding & decoding keys into keywords

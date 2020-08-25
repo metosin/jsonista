@@ -137,9 +137,17 @@
              (.registerModule mapper module)))
      (.disable SerializationFeature/WRITE_DATES_AS_TIMESTAMPS))))
 
-(def ^ObjectMapper +default-mapper+
+(def ^:deprecated ^ObjectMapper +default-mapper+
+  "DEPRECATED: The default ObjectMapper instance."
+  (object-mapper {}))
+
+(def ^ObjectMapper default-object-mapper
   "The default ObjectMapper instance."
   (object-mapper {}))
+
+(def ^ObjectMapper keyword-keys-object-mapper
+  "ObjectMapper instance that uses keyword keys for maps"
+  (object-mapper {:encode-key-fn true, :decode-key-fn true}))
 
 ;;
 ;; Protocols
@@ -209,7 +217,7 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options."
   ([object]
-   (-read-value object +default-mapper+))
+   (-read-value object default-object-mapper))
   ([object ^ObjectMapper mapper]
    (-read-value object mapper)))
 
@@ -218,7 +226,7 @@
 
   To configure, pass in an ObjectMapper created with [[object-mapper]]."
   ([object]
-   (.writeValueAsString +default-mapper+ object))
+   (.writeValueAsString default-object-mapper object))
   ([object ^ObjectMapper mapper]
    (.writeValueAsString mapper object)))
 
@@ -228,7 +236,7 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]]."
   {:tag 'bytes}
   ([object]
-   (.writeValueAsBytes +default-mapper+ object))
+   (.writeValueAsBytes default-object-mapper object))
   ([object ^ObjectMapper mapper]
    (.writeValueAsBytes mapper object)))
 
@@ -239,6 +247,6 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options."
   ([to object]
-   (-write-value to object +default-mapper+))
+   (-write-value to object default-object-mapper))
   ([to object ^ObjectMapper mapper]
    (-write-value to object mapper)))

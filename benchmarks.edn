@@ -1,0 +1,12 @@
+{:benchmarks [{:name :encode
+               :ns jsonista.jmh
+               :fn [encode-data-json encode-cheshire encode-jsonista encode-jackson]
+               :args [:state/edn]}
+              {:name :decode
+               :ns jsonista.jmh
+               :fn [decode-data-json decode-cheshire decode-jsonista decode-jackson]
+               :args [:state/json]}]
+ :states {:json {:fn jsonista.jmh/json-data, :args [:param/size]}
+          :edn {:fn jsonista.jmh/edn-data, :args [:param/size]}}
+ :params {:size ["10b" "100b" "1k" "10k" "100k"]}
+ :options {:jmh/default {:fork {:jvm {:append-args ["-Dclojure.compiler.direct-linking=true"]}}}}}

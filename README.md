@@ -112,9 +112,19 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 Measured using [lein-jmh](https://github.com/jgpc42/lein-jmh),
 see [perf-tests](/test/jsonista/jmh.clj) for details.
 
+### Throughput, relative
+
 ![encode](/docs/json-encode.png)
 
 ![decode](/docs/json-decode.png)
+
+### Throughput, absolute
+
+![encode](/docs/json-encode-t.png)
+
+![decode](/docs/json-decode-t.png)
+
+### Throughput, data
 
 ```bash
 :benchmark                     :name    :mode        :samples  :score              :score-error  :params

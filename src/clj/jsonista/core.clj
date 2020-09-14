@@ -20,7 +20,7 @@
 
   For example, to convert map keys into keywords while decoding:
 
-      (json/from-json +data+ (json/object-mapper {:decode-key-fn true}))
+      (json/read-value +data+ (json/object-mapper {:decode-key-fn true}))
       ;; => {:foo \"bar\"}
 
   See the docstring of [[object-mapper]] for all available options.

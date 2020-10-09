@@ -183,6 +183,50 @@
           #"Can't register encoder 123 for type class clojure.lang.Keyword"
           (j/object-mapper {:encoders {Keyword 123}})))))
 
+
+(deftest custom-decoder-encoder
+  (let [id #uuid "db3fdd09-ba7e-4060-bc34-50969a8b53af"
+        data {:lorem       :ipsum
+              :dolor       id
+              :sit         "#amet"
+              :consectetur ":adipiscing"}
+        expected (str "{"
+                      "\"lorem\":\":ipsum\","
+                      "\"dolor\":\"#db3fdd09-ba7e-4060-bc34-50969a8b53af\","
+                      "\"sit\":\"##amet\","
+                      "\"consectetur\":\"::adipiscing\"}")
+        mapper (j/object-mapper {:decode-key-fn true
+                                 :decode-fn     (fn [v]
+                                                  (condp instance? v
+                                                    String (condp instance? v
+                                                             String (case (first v)
+                                                                      \: (if (str/starts-with? v "::")
+                                                                           (subs v 1)
+                                                                           (keyword (subs v 1)))
+                                                                      \# (if (str/starts-with? v "##")
+                                                                           (subs v 1)
+                                                                           (UUID/fromString (subs v 1)))
+                                                                      v)
+                                                             :else v)
+                                                    :else v))
+                                 :encoders      {String  (fn [v ^JsonGenerator jg]
+                                                           (cond
+                                                             (str/starts-with? v ":")
+                                                             (.writeString jg (str ":" v))
+                                                             (str/starts-with? v "#")
+                                                             (.writeString jg (str "#" v))
+                                                             :else v))
+                                                 UUID    (fn [v ^JsonGenerator jg]
+                                                           (.writeString jg (str "#" v)))
+                                                 Keyword (fn [v ^JsonGenerator jg]
+                                                           (.writeString jg (str ":" (name v))))}})]
+
+
+    (testing "serialization"
+      (is (= expected (-> data (j/write-value-as-string mapper)))))
+    (testing "deserialization"
+      (is (= data (-> expected (j/read-value mapper)))))))
+
 (defn- str->input-stream [^String x] (ByteArrayInputStream. (.getBytes x "UTF-8")))
 
 (defn tmp-file ^File [] (File/createTempFile "temp" ".json"))

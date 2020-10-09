@@ -54,6 +54,8 @@
       FunctionalSerializer
       KeywordSerializer
       KeywordKeyDeserializer
+      FunctionalPersistentHashMapDeserializer
+      FunctionalPersistentVectorDeserializer
       PersistentHashMapDeserializer
       PersistentVectorDeserializer
       SymbolSerializer
@@ -73,11 +75,15 @@
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
-  [{:keys [encode-key-fn decode-key-fn encoders date-format]
-    :or {encode-key-fn true, decode-key-fn false}}]
+  [{:keys [encode-key-fn decode-key-fn encoders date-format decode-fn]
+    :or   {encode-key-fn true, decode-key-fn false}}]
   (doto (SimpleModule. "Clojure")
-    (.addDeserializer java.util.List (PersistentVectorDeserializer.))
-    (.addDeserializer java.util.Map (PersistentHashMapDeserializer.))
+    (.addDeserializer java.util.List (if (fn? decode-fn)
+                                       (FunctionalPersistentVectorDeserializer. decode-fn)
+                                       (PersistentVectorDeserializer.)))
+    (.addDeserializer java.util.Map (if (fn? decode-fn)
+                                      (FunctionalPersistentHashMapDeserializer. decode-fn)
+                                      (PersistentHashMapDeserializer.)))
     (.addSerializer clojure.lang.Keyword (KeywordSerializer. false))
     (.addSerializer clojure.lang.Ratio (RatioSerializer.))
     (.addSerializer clojure.lang.Symbol (SymbolSerializer.))

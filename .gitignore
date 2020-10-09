@@ -11,3 +11,5 @@ pom.xml*
 .#*
 /doc/
 \#*\#
+.idea
+*.iml

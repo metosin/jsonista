@@ -1,6 +1,6 @@
-(defproject metosin/jsonista "0.2.7"
+(defproject alpha-prosoft/jsonista "0.2.8"
   :description "Clojure library for fast JSON encoding and decoding."
-  :url "https://github.com/metosin/jsonista"
+  :url "https://github.com/alpha-prosoft/jsonista"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v20.html"}
   :source-paths ["src/clj"]
@@ -9,7 +9,7 @@
   :plugins [[lein-codox "0.10.7"]
             [lein-jmh "0.3.0"]]
   :deploy-repositories [["releases" :clojars]]
-  :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
+  :codox {:source-uri "http://github.com/alpha-prosoft/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
   :dependencies [[com.fasterxml.jackson.core/jackson-core "2.11.2"]

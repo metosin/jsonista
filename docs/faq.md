@@ -22,3 +22,14 @@ Possible solutions:
 ```
 
 * Look at the dependency tree and see which library is bringing in the wrong version of `jackson-core` and use `:exclusions` to prevent it from happening.
+
+## Writing raw values
+
+Already encoded JSON values can be used with RawValue marker class:
+
+```
+(import '[com.fasterxml.jackson.databind.util RawValue])
+(json/write-value-as-string
+  {:version 555
+   :foobar (RawValue. "{\"foo\": \"bar\"}")})
+```

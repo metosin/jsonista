@@ -5,6 +5,7 @@
             [jsonista.core :as j]
             [cheshire.core :as cheshire]
             [cognitect.transit :as transit]
+            [taoensso.nippy :as nippy]
             [jsonista.tagged :as jt]
             [clojure.edn :as edn])
   (:import (com.fasterxml.jackson.databind ObjectMapper)
@@ -235,7 +236,12 @@
     ;; 82µs
     (title "transit")
     (cc/quick-bench
-      (<-transit (->transit data)))))
+      (<-transit (->transit data)))
+
+    ;; 53µs
+    (title "nippy")
+    (cc/quick-bench
+      (nippy/thaw (nippy/freeze data)))))
 
 (comment
   (encode-decode-transit-jsonista-different-sizes)

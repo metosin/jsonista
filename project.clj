@@ -20,6 +20,7 @@
                                   [jmh-clojure/jmh-clojure "0.4.0"]
                                   [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.12.0"]
                                   [cheshire "5.10.0"]
+                                  [com.taoensso/nippy "3.1.1"]
                                   [org.clojure/data.json "1.0.0"]
                                   [com.cognitect/transit-clj "1.0.324"]
                                   [criterium "0.4.6"]]

@@ -1,3 +1,41 @@
+## UNRELEASED
+
+* new `jsonista.tagged` module for EDN/Transit -style tagged wire formats:
+
+```clj
+(require '[jsonista.core :as j])
+(require '[jsonista.tagged :as jt])
+
+(def mapper
+  (j/object-mapper
+    {:encode-key-fn true
+     :decode-key-fn true
+     :modules [(jt/module
+                 {:handlers {Keyword {:tag "!kw"
+                                      :encode jt/encode-keyword
+                                      :decode keyword}
+                             PersistentHashSet {:tag "!set"
+                                                :encode jt/encode-collection
+                                                :decode set}}})]}))
+
+(-> {:system/status #{:status/good}}
+    (j/write-value-as-string mapper)
+    (doto prn)
+    (j/read-value mapper))
+; prints "{\"system/status\":[\"!set\",[[\"!kw\",\"status/good\"]]]}"
+; => {:system/status #{:status/good}}
+```
+
+* **BREAKING**: latest version of Jackson fails on serializing Joda-times if the `JodaModule` is not present. This is good.
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.12.0"] is available but we use "2.11.2"
+[com.fasterxml.jackson.core/jackson-databind "2.12.0"] is available but we use "2.11.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.0"] is available but we use "2.11.2"
+```
+
 ## 0.2.7 (2020-08-25)
 
 * Fix [#33](https://github.com/metosin/jsonista/issues/33): "Cannot set a custom java.time.LocalTime encoder"

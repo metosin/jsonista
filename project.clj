@@ -12,13 +12,13 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.11.2"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.11.2"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.11.2"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.12.0"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.12.0"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.0"]]
   :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.1"]]}
              :dev {:dependencies [[org.clojure/clojure "1.10.1"]
                                   [jmh-clojure/jmh-clojure "0.4.0"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.11.2"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.12.0"]
                                   [cheshire "5.10.0"]
                                   [org.clojure/data.json "1.0.0"]
                                   [com.cognitect/transit-clj "1.0.324"]

@@ -136,8 +136,11 @@
 (deftest modules-test
   (let [mapper (j/object-mapper {:modules [(JodaModule.)]})
         data {:date (LocalDate. 0 DateTimeZone/UTC)}]
-    (testing "with defaults"
-      (is (str/includes? (j/write-value-as-string data) "\"yearOfEra\":1970")))
+    (testing "fails with missing joda-module"
+      (is (thrown-with-msg?
+            Exception
+            #"Joda date/time type `org.joda.time.LocalDate` not supported by default"
+            (j/write-value-as-string data))))
     (testing "with installed module"
       (is (= "{\"date\":\"1970-01-01\"}" (j/write-value-as-string data mapper))))))
 

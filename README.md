@@ -103,6 +103,8 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 ; "\"1970-01-01\""
 ```
 
+### Tagged JSON
+
 Adding support for lossless encoding data using tagged values. This
 includes both reading and writing support.
 

@@ -1,8 +1,10 @@
 (ns jsonista.jmh
   (:require [jsonista.core :as j]
             [cheshire.core :as cheshire]
-            [clojure.data.json :as json])
-  (:import (com.fasterxml.jackson.databind ObjectMapper)))
+            [clojure.data.json :as json]
+            [jsonista.tagged :as jt])
+  (:import (com.fasterxml.jackson.databind ObjectMapper)
+           (clojure.lang Keyword)))
 
 (set! *warn-on-reflection* true)
 
@@ -36,3 +38,11 @@
 (let [mapper (ObjectMapper.)]
   (defn encode-jackson [x] (.writeValueAsString mapper x))
   (defn decode-jackson [x] (.readValue mapper ^String x ^Class Object)))
+
+(let [mapper (j/object-mapper
+               {:modules [(jt/module
+                            {:handlers {Keyword {:tag "!k"
+                                                 :encode jt/encode-keyword
+                                                 :decode keyword}}})]})]
+  (defn encode-jsonista [x] (j/write-value-as-string x mapper))
+  (defn decode-jsonista [x] (j/read-value x mapper)))

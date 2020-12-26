@@ -103,24 +103,29 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 ; "\"1970-01-01\""
 ```
 
-Adding support for lossless encoding of keywords using tagged values. This
+Adding support for lossless encoding data using tagged values. This
 includes both reading and writing support.
 
 ```clj
-(require '[jsonista.tagged-value :as tagged-value])
-
 (def mapper
   (j/object-mapper
     {:encode-key-fn true
      :decode-key-fn true
-     :modules [(tagged-value/module {:keyword-tag "!kw"})]}))
+     :modules [(jt/module
+                 {:handlers {Keyword {:tag "!kw"
+                                      :encode jt/encode-keyword
+                                      :decode keyword}
+                             PersistentHashSet {:tag "!set"
+                                                :encode jt/encode-collection
+                                                :decode set}}})]}))
 
-(j/write-value-as-string {:system/status :status/good} mapper)
-; "{\"system/status\":[\"!kw\",\"status/good\"]}"
-
-(-> (j/write-value-as-string {:system/status :status/good} mapper)
+(-> {:system/status #{:status/good}}
+    (j/write-value-as-string mapper)
+    (doto prn)
     (j/read-value mapper))
-; {:system/status :status/good}
+; prints "{\"system/status\":[\"!set\",[[\"!kw\",\"status/good\"]]]}"
+; => {:system/status #{:status/good}}
+```
 
 ## Performance
 

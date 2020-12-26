@@ -4,10 +4,14 @@
             [jsonista.test-utils :refer :all]
             [jsonista.core :as j]
             [cheshire.core :as cheshire]
-            [cognitect.transit :as transit])
+            [cognitect.transit :as transit]
+            [jsonista.tagged :as jt]
+            [clojure.edn :as edn])
   (:import (com.fasterxml.jackson.databind ObjectMapper)
-           (java.util Map)
-           (java.io ByteArrayOutputStream ByteArrayInputStream)))
+           (java.util Map Date)
+           (java.io ByteArrayOutputStream ByteArrayInputStream)
+           (clojure.lang Keyword)
+           (com.fasterxml.jackson.core JsonGenerator)))
 
 (set! *warn-on-reflection* true)
 
@@ -195,5 +199,44 @@
     (cc/quick-bench
       (-> data ->json <-json))))
 
+(defn tagged-json-edn-transit []
+
+  (title "tagged json vs edn vs transit")
+
+  (let [mapper (j/object-mapper
+                 {:decode-key-fn true
+                  :modules [(jt/module
+                              {:handlers {Keyword {:tag "~k"
+                                                   :encode jt/encode-keyword
+                                                   :decode keyword}
+                                          Date {:tag "~d"
+                                                :encode (fn [^Date d, ^JsonGenerator gen]
+                                                          (.writeNumber gen (.getTime d)))
+                                                :decode (fn [n] (Date. ^int n))}}})]})
+        data (-> (cheshire/parse-string (slurp "dev-resources/json1k.json") true)
+                 (assoc-in [:results 0 :tags] [::kikka ::kukka])
+                 (assoc-in [:results 0 :created] (new Date)))]
+
+    ;; 26µs
+    (title "jsonista")
+    (cc/quick-bench
+      (j/read-value (j/write-value-as-bytes data)))
+
+    ;; 28µs
+    (title "jsonista-tagged")
+    (cc/quick-bench
+      (j/read-value (j/write-value-as-bytes data mapper) mapper))
+
+    ;; 190µs
+    (title "edn")
+    (cc/quick-bench
+      (edn/read-string (pr-str data)))
+
+    ;; 82µs
+    (title "transit")
+    (cc/quick-bench
+      (<-transit (->transit data)))))
+
 (comment
-  (encode-decode-transit-jsonista-different-sizes))
+  (encode-decode-transit-jsonista-different-sizes)
+  (tagged-json-edn-transit))

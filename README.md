@@ -102,6 +102,26 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 (j/write-value-as-string (LocalDate. 0) mapper)
 ; "\"1970-01-01\""
 ```
+
+Adding support for lossless encoding of keywords using tagged values. This
+includes both reading and writing support.
+
+```clj
+(require '[jsonista.tagged-value :as tagged-value])
+
+(def mapper
+  (j/object-mapper
+    {:encode-key-fn true
+     :decode-key-fn true
+     :modules [(tagged-value/module {:keyword-tag "!kw"})]}))
+
+(j/write-value-as-string {:system/status :status/good} mapper)
+; "{\"system/status\":[\"!kw\",\"status/good\"]}"
+
+(-> (j/write-value-as-string {:system/status :status/good} mapper)
+    (j/read-value mapper))
+; {:system/status :status/good}
+
 ## Performance
 
 * All standard encoders and decoders are written in Java

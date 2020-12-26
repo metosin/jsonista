@@ -11,7 +11,7 @@
   (:import (com.fasterxml.jackson.databind ObjectMapper)
            (java.util Map Date)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
-           (clojure.lang Keyword)
+           (clojure.lang Keyword PersistentHashSet)
            (com.fasterxml.jackson.core JsonGenerator)))
 
 (set! *warn-on-reflection* true)
@@ -210,12 +210,15 @@
                               {:handlers {Keyword {:tag "~k"
                                                    :encode jt/encode-keyword
                                                    :decode keyword}
+                                          PersistentHashSet {:tag "~s"
+                                                             :encode jt/encode-collection
+                                                             :decode set}
                                           Date {:tag "~d"
                                                 :encode (fn [^Date d, ^JsonGenerator gen]
                                                           (.writeNumber gen (.getTime d)))
                                                 :decode (fn [n] (Date. ^int n))}}})]})
         data (-> (cheshire/parse-string (slurp "dev-resources/json1k.json") true)
-                 (assoc-in [:results 0 :tags] [::kikka ::kukka])
+                 (assoc-in [:results 0 :tags] #{::kikka ::kukka})
                  (assoc-in [:results 0 :created] (new Date)))]
 
     ;; 26µs

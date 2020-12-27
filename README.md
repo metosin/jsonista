@@ -129,6 +129,8 @@ includes both reading and writing support.
 ; => {:system/status #{:status/good}}
 ```
 
+In simple [perf tests](https://github.com/metosin/jsonista/blob/master/test/jsonista/json_perf_test.clj), tagged JSON is much faster than EDN or Transit.
+
 ## Performance
 
 * All standard encoders and decoders are written in Java

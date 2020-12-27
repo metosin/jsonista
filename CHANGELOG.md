@@ -1,6 +1,6 @@
-## UNRELEASED
+## 0.3.0 (2020-12-27)
 
-* new `jsonista.tagged` module for EDN/Transit -style tagged wire formats:
+* new `jsonista.tagged` ns for EDN/Transit -style tagged wire formats:
 
 ```clj
 (require '[jsonista.core :as j])

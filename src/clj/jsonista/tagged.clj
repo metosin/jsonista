@@ -2,6 +2,7 @@
   (:import (jsonista.jackson FunctionalSerializer TaggedValueOrPersistentVectorDeserializer)
            (com.fasterxml.jackson.core JsonGenerator)
            (com.fasterxml.jackson.databind.module SimpleModule)
+           (clojure.lang Keyword)
            (java.util List)
            (com.fasterxml.jackson.databind ObjectMapper)))
 
@@ -13,8 +14,8 @@
       (encoder value gen)
       (.writeEndArray gen))))
 
-(defn encode-keyword [x ^JsonGenerator gen]
-  (.writeString gen (.substring (str x) 1)))
+(defn encode-keyword [^Keyword x ^JsonGenerator gen]
+  (.writeString gen (.toString (.sym x))))
 
 (defn encode-collection [es ^JsonGenerator gen]
   (let [mapper ^ObjectMapper (.getCodec gen)]

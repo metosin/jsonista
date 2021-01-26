@@ -23,6 +23,9 @@
                                   [com.taoensso/nippy "3.1.1"]
                                   [org.clojure/data.json "1.0.0"]
                                   [com.cognitect/transit-clj "1.0.324"]
+                                  [org.msgpack/msgpack-core "0.8.22"]
+                                  [org.msgpack/jackson-dataformat-msgpack "0.8.22"
+                                   :exclusions [com.fasterxml.jackson.core/jackson-databind]]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}

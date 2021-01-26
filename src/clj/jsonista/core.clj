@@ -58,7 +58,8 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature)
+    (com.fasterxml.jackson.core JsonGenerator$Feature
+                                JsonFactory)
     (com.fasterxml.jackson.databind
       JsonSerializer
       ObjectMapper
@@ -104,9 +105,11 @@
   The optional first parameter is a map of options. The following options are
   available:
 
-  | Mapper options      |                                      |
-  | ------------------- | -------------------------------------|
-  | `:modules`          | vector of extra ObjectMapper modules |
+  | Mapper options      |                                                            |
+  | ------------------- | ---------------------------------------------------------- |
+  | `:modules`          | vector of extra ObjectMapper modules                       |
+  | `:factory`          | A Jackson JsonFactory for this given mapper                |
+  | `:mapper`           | The base ObjectMapper to start with - overrides `:factory` |
 
   | Encoding options    |                                                   |
   | ------------------- | ------------------------------------------------- |
@@ -126,16 +129,23 @@
   | `:bigdecimals`      |  true to decode doubles as BigDecimals (default: false) |"
   ([] (object-mapper {}))
   ([options]
-   (doto (ObjectMapper.)
-     (.registerModule (JavaTimeModule.))
-     (.registerModule (clojure-module options))
-     (cond-> (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-             (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-             (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII))))
-     (as-> mapper
-           (doseq [module (:modules options)]
-             (.registerModule mapper module)))
-     (.disable SerializationFeature/WRITE_DATES_AS_TIMESTAMPS))))
+   (let [factory (:factory options)
+         maybe-mapper (:mapper options)
+         base-mapper (cond
+                       maybe-mapper maybe-mapper
+                       factory (ObjectMapper. ^JsonFactory factory)
+                       :else (ObjectMapper.))
+         mapper (doto base-mapper
+                  (.registerModule (JavaTimeModule.))
+                  (.registerModule (clojure-module options))
+                  (cond->
+                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
+                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+     (doseq [module (:modules options)]
+       (.registerModule mapper module))
+     (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)
+     mapper)))
 
 (def ^:deprecated ^ObjectMapper +default-mapper+
   "DEPRECATED: The default ObjectMapper instance."

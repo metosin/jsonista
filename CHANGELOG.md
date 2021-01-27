@@ -1,3 +1,27 @@
+## 0.3.1 (2021-01-27)
+
+* new options for `j/object-mapper`:
+
+* `:factory` - A Jackson JsonFactory for this given mapper
+* `:mapper` - The base ObjectMapper to start with - overrides `:factory`
+
+```clj
+(require '[jsonista.core :as j])
+
+(import '(org.msgpack.jackson.dataformat MessagePackFactory))
+
+(def mapper
+  (j/object-mapper 
+    {:factory (MessagePackFactory.)
+     :encode-key-fn true
+     :decode-key-fn true}))
+
+(-> {:kikka 6}
+    (j/write-value-as-bytes mapper)
+    (j/read-value mapper))
+; => {:kikka 6}     
+```
+
 ## 0.3.0 (2020-12-27)
 
 * new `jsonista.tagged` ns for EDN/Transit -style tagged wire formats:

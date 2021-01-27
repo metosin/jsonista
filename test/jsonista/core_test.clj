@@ -12,7 +12,8 @@
            (clojure.lang Keyword ExceptionInfo)
            (java.time Instant LocalTime LocalDateTime ZoneOffset)
            (com.fasterxml.jackson.datatype.joda JodaModule)
-           (org.joda.time LocalDate DateTimeZone)))
+           (org.joda.time LocalDate DateTimeZone)
+           (org.msgpack.jackson.dataformat MessagePackFactory)))
 
 (set! *warn-on-reflection* true)
 
@@ -24,6 +25,9 @@
 (def +kw-mapper+ (j/object-mapper {:decode-key-fn true}))
 (def +upper-mapper+ (j/object-mapper {:decode-key-fn str/upper-case}))
 (def +string-mapper+ (j/object-mapper {:decode-key-fn false}))
+(def +msgpack-mapper+ (j/object-mapper {:factory (MessagePackFactory.)
+                                        :encode-key-fn true
+                                        :decode-key-fn true}))
 
 (deftest simple-roundrobin-test
   (is (stays-same? {"hello" "world"}))
@@ -114,7 +118,8 @@
                           :instant "1970-01-01T00:00:00Z"
                           :local-time "00:00:00"
                           :local-date-time "1970-01-01T00:00:00"}}
-        without-java-time #(update % :dates dissoc :instant :local-time :local-date-time)]
+        without-java-time #(update % :dates dissoc :instant :local-time :local-date-time)
+        expected-with-byte-arrays (assoc expected :bytes (:bytes data))]
 
     (testing "cheshire"
       (testing "fails with java-time"
@@ -127,7 +132,28 @@
       (testing "works like cheshire"
         (let [data (without-java-time data)]
           (is (canonical= (cheshire/generate-string data) (j/write-value-as-string data)))))
-      (is (= expected (j/read-value (j/write-value-as-string data) j/keyword-keys-object-mapper))))))
+      (is (= expected (j/read-value (j/write-value-as-string data) j/keyword-keys-object-mapper))))
+
+    (testing "msgpack"
+      (testing "works like standard json reading/writing"
+        ;; When roundtripping binary representations, some types may shift resolution
+        ;; within a tolerance when encoding/decoding.  Accounting for that..
+        (let [result (j/read-value (j/write-value-as-bytes data +msgpack-mapper+) +msgpack-mapper+)]
+          ;; Confirm our byte arrays are correct via string equality
+          (is (= (String. ^bytes (:bytes expected-with-byte-arrays))
+                 (String. ^bytes (:bytes result))))
+          ;; Confirm floats match when rounded to 2 decimal places
+          (is (= (/ (Math/round (* (get-in expected-with-byte-arrays [:numbers :float] 100)))
+                    100.0)
+                 (/ (Math/round (* (get-in result [:numbers :float] 100)))
+                    100.0)))
+          ;; Confirm everything else matches exactly
+          (is (= (-> expected-with-byte-arrays
+                     (update-in [:numbers] dissoc :float)
+                     (dissoc :bytes))
+                 (-> result
+                     (update-in [:numbers] dissoc :float)
+                     (dissoc :bytes)))))))))
 
 (deftest write-vaue-as-bytes-test
   (is (= (j/write-value-as-string "kikka")

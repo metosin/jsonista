@@ -1,4 +1,4 @@
-# jsonista [![Continuous Integration status](https://github.com/metosin/jsonista/workflows/Run%20tests/badge.svg)](https://github.com/metosin/jsonista/actions) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/jsonista)](https://cljdoc.xyz/d/metosin/jsonista/CURRENT)
+# jsonista [![Continuous Integration status](https://github.com/metosin/jsonista/workflows/Run%20tests/badge.svg?event=push)](https://github.com/metosin/jsonista/actions) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/jsonista)](https://cljdoc.xyz/d/metosin/jsonista/CURRENT)
 
 > *jsonissa / jsonista / jsoniin, jsonilla / jsonilta / jsonille*
 

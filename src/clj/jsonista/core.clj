@@ -135,7 +135,7 @@
                        maybe-mapper maybe-mapper
                        factory (ObjectMapper. ^JsonFactory factory)
                        :else (ObjectMapper.))
-         mapper (doto base-mapper
+         mapper (doto ^ObjectMapper base-mapper
                   (.registerModule (JavaTimeModule.))
                   (.registerModule (clojure-module options))
                   (cond->

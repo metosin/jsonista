@@ -1,3 +1,13 @@
+## UNRELEASED
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.12.2"] is available but we use "2.12.0"
+[com.fasterxml.jackson.core/jackson-databind "2.12.2"] is available but we use "2.12.0"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.2"] is available but we use "2.12.0"
+```
+
 ## 0.3.1 (2021-01-27)
 
 * new options for `j/object-mapper`:

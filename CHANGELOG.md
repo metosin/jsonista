@@ -1,5 +1,6 @@
 ## UNRELEASED
 
+* Remove reflection on ObjectMapper
 * Updated deps:
 
 ```clj

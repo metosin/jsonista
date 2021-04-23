@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.3.2 (2021-04-23)
 
 * Remove reflection on ObjectMapper
 * Updated deps:

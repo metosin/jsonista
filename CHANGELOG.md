@@ -1,3 +1,13 @@
+## UNRELEASED
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.12.3"] is available but we use "2.12.2"
+[com.fasterxml.jackson.core/jackson-databind "2.12.3"] is available but we use "2.12.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.3"] is available but we use "2.12.2"
+```
+
 ## 0.3.2 (2021-04-23)
 
 * Remove reflection on ObjectMapper

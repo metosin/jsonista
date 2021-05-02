@@ -1,4 +1,4 @@
-## UNRELEASED
+## 0.3.3 (2021-05-02)
 
 * Updated deps:
 

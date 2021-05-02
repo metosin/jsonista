@@ -205,6 +205,6 @@ jsonista.jmh/decode-jackson    :decode  :throughput  5         2342.444     ops/
 
 ## License
 
-Copyright &copy; 2016-2020 [Metosin Oy](http://www.metosin.fi).
+Copyright &copy; 2016-2021 [Metosin Oy](http://www.metosin.fi).
 
 Distributed under the Eclipse Public License 2.0.

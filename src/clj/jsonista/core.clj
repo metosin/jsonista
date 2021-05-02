@@ -58,33 +58,32 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature
-                                JsonFactory)
+    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
     (com.fasterxml.jackson.databind
-      JsonSerializer
-      ObjectMapper
-      module.SimpleModule
-      SerializationFeature DeserializationFeature)
+      JsonSerializer ObjectMapper module.SimpleModule
+      SerializationFeature DeserializationFeature Module)
     (com.fasterxml.jackson.databind.module SimpleModule)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)
-    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)))
+    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
+    (java.util List Map Date)
+    (clojure.lang Keyword Ratio Symbol)))
 
-(defn- clojure-module
+(defn- ^Module clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
   [{:keys [encode-key-fn decode-key-fn encoders date-format]
     :or {encode-key-fn true, decode-key-fn false}}]
   (doto (SimpleModule. "Clojure")
-    (.addDeserializer java.util.List (PersistentVectorDeserializer.))
-    (.addDeserializer java.util.Map (PersistentHashMapDeserializer.))
-    (.addSerializer clojure.lang.Keyword (KeywordSerializer. false))
-    (.addSerializer clojure.lang.Ratio (RatioSerializer.))
-    (.addSerializer clojure.lang.Symbol (SymbolSerializer.))
-    (.addSerializer java.util.Date (if date-format
-                                     (DateSerializer. date-format)
-                                     (DateSerializer.)))
+    (.addDeserializer List (PersistentVectorDeserializer.))
+    (.addDeserializer Map (PersistentHashMapDeserializer.))
+    (.addSerializer Keyword (KeywordSerializer. false))
+    (.addSerializer Ratio (RatioSerializer.))
+    (.addSerializer Symbol (SymbolSerializer.))
+    (.addSerializer Date (if date-format
+                           (DateSerializer. date-format)
+                           (DateSerializer.)))
     (as-> module
           (doseq [[type encoder] encoders]
             (cond
@@ -96,8 +95,8 @@
     (cond->
       (true? decode-key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
       (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
-      (true? encode-key-fn) (.addKeySerializer clojure.lang.Keyword (KeywordSerializer. true))
-      (fn? encode-key-fn) (.addKeySerializer clojure.lang.Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
+      (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
+      (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
 
 (defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.

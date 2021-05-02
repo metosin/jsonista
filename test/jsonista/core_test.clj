@@ -143,9 +143,9 @@
           (is (= (String. ^bytes (:bytes expected-with-byte-arrays))
                  (String. ^bytes (:bytes result))))
           ;; Confirm floats match when rounded to 2 decimal places
-          (is (= (/ (Math/round (* (get-in expected-with-byte-arrays [:numbers :float] 100)))
+          (is (= (/ (Math/round (float (* (get-in expected-with-byte-arrays [:numbers :float] 100))))
                     100.0)
-                 (/ (Math/round (* (get-in result [:numbers :float] 100)))
+                 (/ (Math/round (float (* (get-in result [:numbers :float] 100))))
                     100.0)))
           ;; Confirm everything else matches exactly
           (is (= (-> expected-with-byte-arrays

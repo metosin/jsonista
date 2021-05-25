@@ -338,23 +338,24 @@
 
 (defn- wrap-values
   [^Iterator iterator]
-  (reify
-    Iterable
-    (iterator [this] iterator)
-    Iterator
-    (hasNext [this] (.hasNext iterator))
-    (next [this] (.next iterator))
-    (remove [this] (.remove iterator))
-    clojure.lang.IReduceInit
-    (reduce [_ f val]
-      (loop [ret val]
-        (if (.hasNext iterator)
-          (let [ret (f ret (.next iterator))]
-            (if (reduced? ret)
-              @ret
-              (recur ret)))
-          ret)))
-    clojure.lang.Sequential))
+  (when iterator
+    (reify
+      Iterable
+      (iterator [this] iterator)
+      Iterator
+      (hasNext [this] (.hasNext iterator))
+      (next [this] (.next iterator))
+      (remove [this] (.remove iterator))
+      clojure.lang.IReduceInit
+      (reduce [_ f val]
+        (loop [ret val]
+          (if (.hasNext iterator)
+            (let [ret (f ret (.next iterator))]
+              (if (reduced? ret)
+                @ret
+                (recur ret)))
+            ret)))
+      clojure.lang.Sequential)))
 
 (defn read-values
   "Decodes a sequence of values from a JSON as an iterator

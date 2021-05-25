@@ -243,6 +243,33 @@
     (testing "Reader"
       (is (= original (j/read-value (InputStreamReader. (str->input-stream input-string))))))))
 
+(deftest read-values-types
+  (let [original [{"ok" 1}]
+        input-string (j/write-value-as-string original)
+        file (tmp-file)]
+    (spit file input-string)
+
+    (testing "nil"
+      (is (= nil (j/read-values nil))))
+
+    (testing "byte-array"
+      (is (= original (j/read-values (j/write-value-as-bytes original)))))
+
+    (testing "File"
+      (is (= original (j/read-values file))))
+
+    (testing "URL"
+      (is (= original (j/read-values (.toURL file)))))
+
+    (testing "String"
+      (is (= original (j/read-values input-string))))
+
+    (testing "InputStream"
+      (is (= original (j/read-values (str->input-stream input-string)))))
+
+    (testing "Reader"
+      (is (= original (j/read-values (InputStreamReader. (str->input-stream input-string))))))))
+
 (deftest write-value-types
   (let [original {"ok" 1}
         expected (j/write-value-as-string original)
@@ -268,3 +295,52 @@
       (is (= expected (slurp file)))
       (.delete file))))
 
+(deftest write-values-types
+  (let [original [{"ok" 1}]
+        expected (j/write-value-as-string original)
+        file (tmp-file)]
+
+    (testing "File"
+      (j/write-values file original)
+      (is (= expected (slurp file)))
+      (.delete file))
+
+    (testing "OutputStream"
+      (j/write-values (FileOutputStream. file) original)
+      (is (= expected (slurp file)))
+      (.delete file))
+
+    (testing "DataOutput"
+      (j/write-values (RandomAccessFile. file "rw") original)
+      (is (= expected (slurp file)))
+      (.delete file))
+
+    (testing "Writer"
+      (j/write-values (FileWriter. file) original)
+      (is (= expected (slurp file)))
+      (.delete file))))
+
+(deftest read-values-iteration
+  (let [original [{"ok" 1}]
+        ^java.util.Iterator it (j/read-values (j/write-value-as-bytes original))]
+    (is (instance? java.util.Iterator it))
+    (is (.hasNext it))
+    (is (= (first original) (.next it)))
+    (is (false? (.hasNext it)))))
+
+(deftest read-values-reduction
+  (let [original [{"ok" 1}]
+        ^java.util.Iterator it (j/read-values (j/write-value-as-bytes original))
+        xf (map #(update % "ok" inc))]
+    (is (= (into [] xf original) (into [] xf it)))))
+
+(deftest write-values-iterable
+  (let [original [{"ok" 1}]
+        xf (map #(update % "ok" inc))
+        expected (j/write-value-as-string (into [] xf original))
+        file (tmp-file)
+        eduction (->Eduction xf original)]
+
+    (j/write-values file eduction)
+    (is (= expected (slurp file)))
+    (.delete file)))

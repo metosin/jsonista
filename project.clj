@@ -21,7 +21,7 @@
                                   [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.12.3"]
                                   [cheshire "5.10.0"]
                                   [com.taoensso/nippy "3.1.1"]
-                                  [org.clojure/data.json "2.2.2"]
+                                  [org.clojure/data.json "2.3.1"]
                                   [com.cognitect/transit-clj "1.0.324"]
                                   [org.msgpack/msgpack-core "0.8.22"]
                                   [org.msgpack/jackson-dataformat-msgpack "0.8.22"

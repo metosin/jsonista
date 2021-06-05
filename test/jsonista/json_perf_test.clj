@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [jsonista.test-utils :refer :all]
             [jsonista.core :as j]
+            [jsonista.streaming :as js]
             [cheshire.core :as cheshire]
             [cognitect.transit :as transit]
             [taoensso.nippy :as nippy]
@@ -302,25 +303,20 @@
      :title "Jsonista readValues"}
     (dotimes [i 100]
       (with-open [rdr (io/reader "temp/fintraffic-ship-locations-features.geojson")]
-        (doall (iterator-seq (.readValues (.readerFor j/default-object-mapper ^Class Object) rdr))))))
-
-  ;; Seq keeps cache, so the full value is stored in memory...?
-  (defn read-array-values [^JsonParser parser]
-    (when (not= JsonToken/END_ARRAY (.nextToken parser))
-      (let [v (.readValueAs parser ^Class Object) ]
-        (lazy-seq (cons v (read-array-values parser))))))
+        (last (iterator-seq (js/read-values (js/create-parser rdr j/default-object-mapper)))))))
 
   (prof/profile
     {:event :alloc
      :title "Jsonista readValues"}
     (dotimes [i 100]
       (with-open [rdr (io/reader "temp/fintraffic-ship-locations.geojson")]
-        (let [parser (.createParser (.getFactory j/default-object-mapper) rdr)]
+        (let [^JsonParser parser (js/create-parser rdr j/default-object-mapper)]
           (.nextToken parser) ;; START_OBJECT
           (.nextToken parser) ;; "type"
           (.nextToken parser) ;; "FeatureCollection"
           (.nextToken parser) ;; "features"
-          (.nextToken parser) ;; START_ARRAY
-          (last (read-array-values parser))
+          ;; Next token is START_ARRAY
+          ;; Read values will move parser to the first object & read values
+          (last (iterator-seq (js/read-values parser)))
           ;; TODO: Could also assert that file ends validly?
           )))))

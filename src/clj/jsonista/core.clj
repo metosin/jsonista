@@ -58,15 +58,16 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
+    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory
+                                JsonParser JsonToken)
     (com.fasterxml.jackson.databind
-      JsonSerializer ObjectMapper module.SimpleModule
+      JsonSerializer ObjectMapper SequenceWriter
       SerializationFeature DeserializationFeature Module)
     (com.fasterxml.jackson.databind.module SimpleModule)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)
     (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
-    (java.util List Map Date)
+    (java.util List Map Date Iterator)
     (clojure.lang Keyword Ratio Symbol)))
 
 (defn- ^Module clojure-module
@@ -194,6 +195,85 @@
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object)))
 
+(defprotocol CreateParser
+  (-create-parser [this mapper]))
+
+(extend-protocol CreateParser
+
+  (Class/forName "[B")
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) ^bytes this))
+
+  File
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  URL
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  String
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  Reader
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  InputStream
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this)))
+
+(defn ^JsonParser create-parser
+  ([this]
+   (-create-parser this default-object-mapper))
+  ([this ^ObjectMapper om]
+   (-create-parser this om)))
+
+(defprotocol ReadValues
+  (-read-values [this mapper]))
+
+(extend-protocol ReadValues
+
+  (Class/forName "[B")
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) ^bytes this))
+
+  nil
+  (-read-values [_ _])
+
+  File
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  URL
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  String
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  Reader
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  InputStream
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  JsonParser
+  (-read-values [this _]
+    ;; This version is just for reading arrays. Should this
+    ;; also work with something else?
+    ;; Current token is empty (e.g. start of document) or just the token before array start
+    (assert (= JsonToken/START_ARRAY (.nextToken this)))
+    ;; Current token is START_ARRAY
+    (.nextToken this)
+    ;; Current token is the START_OBJECT for first object
+    ;; Should stop at the END_ARRAY
+    (.readValuesAs this ^Class Object)))
+
 (defprotocol WriteValue
   (-write-value [this value mapper]))
 
@@ -213,6 +293,50 @@
   Writer
   (-write-value [this value ^ObjectMapper mapper]
     (.writeValue mapper this value)))
+
+(defprotocol WriteAll
+  (-write-all [this ^SequenceWriter writer]))
+
+(extend-protocol WriteAll
+
+  (Class/forName "[Ljava.lang.Object;")
+  (-write-all [this ^SequenceWriter w]
+    (.writeAll w ^"[Ljava.lang.Object;" this))
+
+  Iterable
+  (-write-all [this ^SequenceWriter w]
+    (.writeAll w this)))
+
+(defprotocol WriteValues
+  (-write-values [this values mapper]))
+
+(defmacro ^:private -write-values*
+  [this value mapper]
+  `(doto ^SequenceWriter
+       (-write-all
+        ~value
+        (-> ~mapper
+            (.writerFor Object)
+            (.without SerializationFeature/FLUSH_AFTER_WRITE_VALUE)
+            (.writeValuesAsArray ~this)))
+     (.close)))
+
+(extend-protocol WriteValues
+  File
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* this value mapper))
+
+  OutputStream
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* this value mapper))
+
+  DataOutput
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* this value mapper))
+
+  Writer
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* this value mapper)))
 
 ;;
 ;; public api
@@ -259,3 +383,53 @@
    (-write-value to object default-object-mapper))
   ([to object ^ObjectMapper mapper]
    (-write-value to object mapper)))
+
+(defn- wrap-values
+  [^Iterator iterator]
+  (when iterator
+    (reify
+      Iterable
+      (iterator [this] iterator)
+      Iterator
+      (hasNext [this] (.hasNext iterator))
+      (next [this] (.next iterator))
+      (remove [this] (.remove iterator))
+      clojure.lang.IReduceInit
+      (reduce [_ f val]
+        (loop [ret val]
+          (if (.hasNext iterator)
+            (let [ret (f ret (.next iterator))]
+              (if (reduced? ret)
+                @ret
+                (recur ret)))
+            ret)))
+      clojure.lang.Sequential)))
+
+(defn read-values
+  "Decodes a sequence of values from a JSON as an iterator
+  from anything that satisfies [[ReadValue]] protocol.
+  By default, File, URL, String, Reader and InputStream are supported.
+
+  The returned object is an Iterable, Iterator and IReduceInit.
+  It can be reduced on via [[reduce]] and turned into a lazy sequence
+  via [[iterator-seq]].
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([object]
+   (wrap-values (-read-values object default-object-mapper)))
+  ([object ^ObjectMapper mapper]
+   (wrap-values (-read-values object mapper))))
+
+(defn write-values
+  "Encode values as JSON and write using the provided [[WriteValue]] instance.
+  By default, File, OutputStream, DataOutput and Writer are supported.
+
+  By default, values can be an array or an Iterable.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([to object]
+   (-write-values to object default-object-mapper))
+  ([to object ^ObjectMapper mapper]
+   (-write-values to object mapper)))

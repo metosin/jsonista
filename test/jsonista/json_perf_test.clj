@@ -1,6 +1,7 @@
 (ns jsonista.json-perf-test
   (:require [criterium.core :as cc]
             [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [jsonista.test-utils :refer :all]
             [jsonista.core :as j]
             [cheshire.core :as cheshire]
@@ -10,9 +11,12 @@
             [clojure.edn :as edn])
   (:import (com.fasterxml.jackson.databind ObjectMapper)
            (java.util Map Date)
-           (java.io ByteArrayOutputStream ByteArrayInputStream)
+           (java.io ByteArrayOutputStream ByteArrayInputStream Reader)
+           (java.net URL)
+           (java.util.zip GZIPInputStream)
            (clojure.lang Keyword PersistentHashSet)
-           (com.fasterxml.jackson.core JsonGenerator)))
+           (com.fasterxml.jackson.core JsonGenerator JsonToken JsonParser)
+           (com.fasterxml.jackson.databind JsonNode)))
 
 (set! *warn-on-reflection* true)
 
@@ -249,3 +253,74 @@
 (comment
   (encode-decode-transit-jsonista-different-sizes)
   (tagged-json-edn-transit))
+
+(comment
+  (require '[clj-async-profiler.core :as prof])
+  (prof/serve-files 8111)
+  (prof/list-event-types)
+
+  (defn read-geojson-features
+    [^Reader f]
+    (let [^JsonNode tree (.readTree j/default-object-mapper f)
+          ^JsonNode node (.get tree "features")]
+      (->> (map (fn [node]
+                  (.treeToValue j/default-object-mapper node ^Class Object))
+                node))))
+
+  ;; Get test file
+  (let [url (URL. "https://meri.digitraffic.fi/api/v1/locations/latest")
+        con (.openConnection url)]
+    (.setRequestProperty con "Accept-Encoding" "gzip")
+    (with-open [is (.getInputStream con)
+                is (GZIPInputStream. is)
+                rdr (io/reader is)]
+      (io/copy rdr (io/file "temp/fintraffic-ship-locations.geojson"))))
+
+  ;; Create test file with just top level array
+  (spit "temp/fintraffic-ship-locations-features.geojson"
+        (j/write-value-as-string (get (j/read-value (slurp "temp/fintraffic-ship-locations.geojson")) "features")
+                                 (j/object-mapper {:pretty true})))
+
+  (prof/start)
+  (prof/stop)
+  (prof/profile
+    {:event :alloc
+     :title "Jsonista normal"}
+    (dotimes [i 100]
+      (with-open [rdr (io/reader "temp/fintraffic-ship-locations.geojson")]
+        (j/read-value rdr ))))
+
+  (prof/profile
+    {:event :alloc
+     :title "Jsonista readTree"}
+    (dotimes [i 100]
+      (with-open [rdr (io/reader "temp/fintraffic-ship-locations.geojson")]
+        (doall (read-geojson-features rdr)))))
+
+  (prof/profile
+    {:event :alloc
+     :title "Jsonista readValues"}
+    (dotimes [i 100]
+      (with-open [rdr (io/reader "temp/fintraffic-ship-locations-features.geojson")]
+        (doall (iterator-seq (.readValues (.readerFor j/default-object-mapper ^Class Object) rdr))))))
+
+  ;; Seq keeps cache, so the full value is stored in memory...?
+  (defn read-array-values [^JsonParser parser]
+    (when (not= JsonToken/END_ARRAY (.nextToken parser))
+      (let [v (.readValueAs parser ^Class Object) ]
+        (lazy-seq (cons v (read-array-values parser))))))
+
+  (prof/profile
+    {:event :alloc
+     :title "Jsonista readValues"}
+    (dotimes [i 100]
+      (with-open [rdr (io/reader "temp/fintraffic-ship-locations.geojson")]
+        (let [parser (.createParser (.getFactory j/default-object-mapper) rdr)]
+          (.nextToken parser) ;; START_OBJECT
+          (.nextToken parser) ;; "type"
+          (.nextToken parser) ;; "FeatureCollection"
+          (.nextToken parser) ;; "features"
+          (.nextToken parser) ;; START_ARRAY
+          (last (read-array-values parser))
+          ;; TODO: Could also assert that file ends validly?
+          )))))

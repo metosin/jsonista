@@ -26,6 +26,7 @@
                                   [org.msgpack/msgpack-core "0.8.22"]
                                   [org.msgpack/jackson-dataformat-msgpack "0.8.22"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.5.0"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}

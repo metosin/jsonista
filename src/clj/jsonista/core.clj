@@ -58,7 +58,8 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
+    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory
+                                JsonParser JsonToken)
     (com.fasterxml.jackson.databind
       JsonSerializer ObjectMapper SequenceWriter
       SerializationFeature DeserializationFeature Module)
@@ -194,6 +195,41 @@
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object)))
 
+(defprotocol CreateParser
+  (-create-parser [this mapper]))
+
+(extend-protocol CreateParser
+
+  (Class/forName "[B")
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) ^bytes this))
+
+  File
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  URL
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  String
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  Reader
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+
+  InputStream
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this)))
+
+(defn ^JsonParser create-parser
+  ([this]
+   (-create-parser this default-object-mapper))
+  ([this ^ObjectMapper om]
+   (-create-parser this om)))
+
 (defprotocol ReadValues
   (-read-values [this mapper]))
 
@@ -224,7 +260,19 @@
 
   InputStream
   (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this)))
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  JsonParser
+  (-read-values [this _]
+    ;; This version is just for reading arrays. Should this
+    ;; also work with something else?
+    ;; Current token is empty (e.g. start of document) or just the token before array start
+    (assert (= JsonToken/START_ARRAY (.nextToken this)))
+    ;; Current token is START_ARRAY
+    (.nextToken this)
+    ;; Current token is the START_OBJECT for first object
+    ;; Should stop at the END_ARRAY
+    (.readValuesAs this ^Class Object)))
 
 (defprotocol WriteValue
   (-write-value [this value mapper]))

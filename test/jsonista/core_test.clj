@@ -268,7 +268,11 @@
       (is (= original (j/read-values (str->input-stream input-string)))))
 
     (testing "Reader"
-      (is (= original (j/read-values (InputStreamReader. (str->input-stream input-string))))))))
+      (is (= original (j/read-values (InputStreamReader. (str->input-stream input-string))))))
+
+    (testing "JsonParser"
+      (let [parser (j/create-parser input-string)]
+        (is (= original (j/read-values parser)))))))
 
 (deftest write-value-types
   (let [original {"ok" 1}
@@ -344,3 +348,21 @@
     (j/write-values file eduction)
     (is (= expected (slurp file)))
     (.delete file)))
+
+(deftest read-values-parser
+  (let [original {"type" "FeatureCollection"
+                  "features" [{"value" 1}
+                              {"value" 1}
+                              {"value" 1}]
+                  "foo" "bar"}
+        input-string (j/write-value-as-string original)]
+    ;; Ugh. Parser .readValuesAs works a bit different than ObjectReader .readValues
+    (testing "JsonParser"
+      (let [parser (j/create-parser input-string)]
+        ;; token = nil, start of document
+        (.nextToken parser) ;; START_OBJECT
+        (.nextToken parser) ;; "type"
+        (.nextToken parser) ;; "FeatureCollection"
+        (.nextToken parser) ;; "features"
+        (is (= (get original "features")
+               (j/read-values parser)))))))

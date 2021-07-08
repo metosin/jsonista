@@ -116,7 +116,7 @@ includes both reading and writing support.
      :modules [(jt/module
                  {:handlers {Keyword {:tag "!kw"
                                       :encode jt/encode-keyword
-                                      :decode keyword}
+                                      :decode jt/decode-keyword}
                              PersistentHashSet {:tag "!set"
                                                 :encode jt/encode-collection
                                                 :decode set}}})]}))
@@ -125,7 +125,7 @@ includes both reading and writing support.
     (j/write-value-as-string mapper)
     (doto prn)
     (j/read-value mapper))
-; prints "{\"system/status\":[\"!set\",[[\"!kw\",\"status/good\"]]]}"
+; prints "{\"system/status\":[\"!set\",[[\"!kw\",[\"status\",\"good\"]]]]}"
 ; => {:system/status #{:status/good}}
 ```
 

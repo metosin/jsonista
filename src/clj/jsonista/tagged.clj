@@ -2,7 +2,7 @@
   (:import (jsonista.jackson FunctionalSerializer TaggedValueOrPersistentVectorDeserializer)
            (com.fasterxml.jackson.core JsonGenerator)
            (com.fasterxml.jackson.databind.module SimpleModule)
-           (clojure.lang Keyword)
+           (clojure.lang Keyword Symbol)
            (java.util List)
            (com.fasterxml.jackson.databind ObjectMapper)))
 
@@ -15,7 +15,17 @@
       (.writeEndArray gen))))
 
 (defn encode-keyword [^Keyword x ^JsonGenerator gen]
-  (.writeString gen (.toString (.sym x))))
+  (let [^Symbol s (.sym x)]
+    (.writeStartArray gen)
+    (when-let [namespace (.getNamespace s)]
+      (.writeString gen namespace))
+    (.writeString gen (.getName s))
+    (.writeEndArray gen)))
+
+(defn decode-keyword [[^String arg1 & [^String arg2 :as args]]]
+  (if (seq args)
+    (Keyword/intern arg1 arg2)
+    (Keyword/intern arg1)))
 
 (defn encode-collection [es ^JsonGenerator gen]
   (let [mapper ^ObjectMapper (.getCodec gen)]
@@ -31,7 +41,7 @@
 
    This provides both encoders and decoders and is a means of using jsonista to replace something
    like transit, while still maintaining support for more EDN types. Types are encoded using a JSON
-   list and a customizable tag. For example, `:foo/bar` would serialize to `[\"!kw\", \"foo/bar\"]`
+   list and a customizable tag. For example, `:foo/bar` would serialize to `[\"!kw\", [\"foo\", \"bar\"]]`
    by default, where the first string in the JSON list is a tag for what follows.
 
        (def mapper (j/object-mapper
@@ -39,7 +49,7 @@
                       :modules [(jt/module
                                   {:handlers {Keyword {:tag \"!kw\"
                                                        :encode jt/encode-keyword
-                                                       :decode keyword}
+                                                       :decode jt/decode-keyword}
                                               PersistentHashSet {:tag \"!set\"
                                                                  :encode jt/encode-collection
                                                                  :decode set}}})]}))
@@ -48,7 +58,7 @@
           (j/write-value-as-string mapper)
           (doto prn)
           (j/read-value mapper))
-      ; prints \"{\\\"kikka\\\":[\\\"!set\\\",[[\\\"!kw\\\",\\\"kukka\\\"],[\\\"!kw\\\",\\\"kakka\\\"]]]}\"
+      ; prints \"{\\\"kikka\\\":[\\\"!set\\\",[[\\\"!kw\\\",[\\\"kukka\\\"]],[\\\"!kw\\\",[\\\"kakka\\\"]]]]}\"
       ; => {:kikka #{:kukka :kakka}}"
   ^SimpleModule
   [{:keys [handlers]}]

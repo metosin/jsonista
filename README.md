@@ -206,10 +206,9 @@ jsonista.jmh/decode-jackson        :decode  :throughput  5         2211.046     
 ## Making a release
 
 - Update `CHANGELOG.md` and increment the version number in `project.clj`
-- Commit
-- Tag with the release number
-- Push to Github
-- Create a Github release by editing the tag you just created on <https://github.com/metosin/jsonista/tags>
+- Commit and push to Github
+- Create a Github release [here](https://github.com/metosin/jsonista/releases)
+  - Use the version number of the release for the tag name
 - The [Github Actions release workflow](.github/workflows/release.yml) should fire and deploy a release to clojars
 
 ## License

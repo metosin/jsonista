@@ -203,6 +203,15 @@ jsonista.jmh/decode-jackson        :decode  :throughput  5         23871.633    
 jsonista.jmh/decode-jackson        :decode  :throughput  5         2211.046     ops/s  91.282        {:size "100k"}
 ```
 
+## Making a release
+
+- Update `CHANGELOG.md` and increment the version number in `project.clj`
+- Commit
+- Tag with the release number
+- Push to Github
+- Create a Github release by editing the tag you just created on <https://github.com/metosin/jsonista/tags>
+- The [Github Actions release workflow](.github/workflows/release.yml) should fire and deploy a release to clojars
+
 ## License
 
 Copyright &copy; 2016-2021 [Metosin Oy](http://www.metosin.fi).

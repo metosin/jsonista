@@ -9,7 +9,10 @@
   :java-source-paths ["src/java"]
   :plugins [[lein-codox "0.10.7"]
             [lein-jmh "0.3.0"]]
-  :deploy-repositories [["releases" :clojars]]
+  :deploy-repositories [["releases" {:url "https://repo.clojars.org/"
+                                     :sign-releases false
+                                     :username :env/CLOJARS_USER
+                                     :password :env/CLOJARS_DEPLOY_TOKEN}]]
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}

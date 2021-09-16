@@ -2,6 +2,7 @@
 
 * add `deps.edn` to the project
 * run tests with Java17
+* Provide GraalVM native-image --initialize-at-build-time args, [#58](https://github.com/metosin/jsonista/pull/58)
 
 * Updated deps:
 

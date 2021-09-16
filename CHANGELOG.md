@@ -1,4 +1,4 @@
-## UNRELESED
+## 0.3.4 (2021-09-16)
 
 * add `deps.edn` to the project
 * run tests with Java17
@@ -46,7 +46,7 @@
 (import '(org.msgpack.jackson.dataformat MessagePackFactory))
 
 (def mapper
-  (j/object-mapper 
+  (j/object-mapper
     {:factory (MessagePackFactory.)
      :encode-key-fn true
      :decode-key-fn true}))
@@ -54,7 +54,7 @@
 (-> {:kikka 6}
     (j/write-value-as-bytes mapper)
     (j/read-value mapper))
-; => {:kikka 6}     
+; => {:kikka 6}
 ```
 
 ## 0.3.0 (2020-12-27)

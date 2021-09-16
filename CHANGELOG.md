@@ -1,3 +1,16 @@
+## UNRELESED
+
+* add `deps.edn` to the project
+* run tests with Java17
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.12.5"] is available but we use "2.12.3"
+[com.fasterxml.jackson.core/jackson-databind "2.12.5"] is available but we use "2.12.3"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.5"] is available but we use "2.12.3"
+```
+
 ## 0.3.3 (2021-05-02)
 
 * Updated deps:

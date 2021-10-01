@@ -225,6 +225,9 @@
     (.createParser (.getFactory mapper) this)))
 
 (defn ^JsonParser create-parser
+  "Create an JsonParser using given ObjectMapper.
+
+  See also: https://fasterxml.github.io/jackson-core/javadoc/2.10/com/fasterxml/jackson/core/JsonParser.html"
   ([this]
    (-create-parser this default-object-mapper))
   ([this ^ObjectMapper om]
@@ -260,19 +263,7 @@
 
   InputStream
   (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  JsonParser
-  (-read-values [this _]
-    ;; This version is just for reading arrays. Should this
-    ;; also work with something else?
-    ;; Current token is empty (e.g. start of document) or just the token before array start
-    (assert (= JsonToken/START_ARRAY (.nextToken this)))
-    ;; Current token is START_ARRAY
-    (.nextToken this)
-    ;; Current token is the START_OBJECT for first object
-    ;; Should stop at the END_ARRAY
-    (.readValuesAs this ^Class Object)))
+    (.readValues (.readerFor mapper ^Class Object) this)))
 
 (defprotocol WriteValue
   (-write-value [this value mapper]))
@@ -384,7 +375,12 @@
   ([to object ^ObjectMapper mapper]
    (-write-value to object mapper)))
 
-(defn- wrap-values
+;; Calling iterator-seq in read-values would immediately initialize the seq.
+;; Creating the Iterable allows creating the seq, when it is needed.
+;; TODO: Name?
+(defn wrap-values
+  "Wraps Jackson Iterator into Iterable, so it can be
+  converted to a seq automatically."
   [^Iterator iterator]
   (when iterator
     (reify

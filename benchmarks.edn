@@ -1,10 +1,10 @@
 {:benchmarks [{:name :encode
                :ns jsonista.jmh
-               :fn [encode-data-json encode-cheshire encode-jsonista encode-jackson encode-jsonista-fast]
+               :fn [encode-data-json encode-cheshire encode-jsonista encode-jackson #_encode-jsonista-fast]
                :args [:state/edn]}
               {:name :decode
                :ns jsonista.jmh
-               :fn [decode-data-json decode-cheshire decode-jsonista decode-jackson decode-jsonista-fast]
+               :fn [decode-data-json decode-cheshire decode-jsonista decode-jackson #_decode-jsonista-fast]
                :args [:state/json]}]
  :states {:json {:fn jsonista.jmh/json-data, :args [:param/size]}
           :edn {:fn jsonista.jmh/edn-data, :args [:param/size]}}

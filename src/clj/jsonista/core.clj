@@ -54,6 +54,8 @@
       FunctionalSerializer
       KeywordSerializer
       KeywordKeyDeserializer
+      HashMapDeserializer
+      ArrayListDeserializer
       PersistentHashMapDeserializer
       PersistentVectorDeserializer
       SymbolSerializer
@@ -97,6 +99,13 @@
       (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
       (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
       (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
+
+(defn ^:no-doc ^Module java-collection-module
+  "Create a Jackson Databind module to support Java HashMap and ArrayList."
+  []
+  (doto (SimpleModule. "JavaCollectionModule")
+    (.addDeserializer List (ArrayListDeserializer.))
+    (.addDeserializer Map (HashMapDeserializer.))))
 
 (defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.

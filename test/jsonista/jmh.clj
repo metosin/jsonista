@@ -35,6 +35,10 @@
 (defn encode-jsonista [x] (j/write-value-as-string x))
 (defn decode-jsonista [x] (j/read-value x))
 
+(let [mapper (j/object-mapper {:modules [(j/java-collection-module)]})]
+  (defn encode-jsonista-fast [x] (.writeValueAsString mapper x))
+  (defn decode-jsonista-fast [x] (.readValue mapper ^String x ^Class Object)))
+
 (let [mapper (ObjectMapper.)]
   (defn encode-jackson [x] (.writeValueAsString mapper x))
   (defn decode-jackson [x] (.readValue mapper ^String x ^Class Object)))

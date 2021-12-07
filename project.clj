@@ -7,7 +7,7 @@
   :resource-paths ["resources"]
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :java-source-paths ["src/java"]
-  :plugins [[lein-codox "0.10.7"]
+  :plugins [[lein-codox "0.10.8"]
             [lein-jmh "0.3.0"]]
   :deploy-repositories [["releases" {:url "https://repo.clojars.org/"
                                      :sign-releases false
@@ -16,13 +16,13 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.12.5"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.12.5"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.12.5"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.13.0"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.13.0"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.13.0"]]
   :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.1"]]}
              :dev {:dependencies [[org.clojure/clojure "1.10.1"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.12.5"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.13.0"]
                                   [cheshire "5.10.1"]
                                   [com.taoensso/nippy "3.1.1"]
                                   [org.clojure/data.json "2.4.0"]
@@ -30,6 +30,7 @@
                                   [org.msgpack/msgpack-core "0.9.0"]
                                   [org.msgpack/jackson-dataformat-msgpack "0.9.0"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
+                                  [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}

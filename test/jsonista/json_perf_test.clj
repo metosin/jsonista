@@ -60,12 +60,12 @@
   (assert (= +data+ (cheshire/parse-string-strict +json+)))
   (cc/quick-bench (cheshire/parse-string-strict +json+))
 
-  ;; 390ns
+  ;; 300ns
   (title "decode: jsonista")
   (assert (= +data+ (j/read-value +json+)))
   (cc/quick-bench (j/read-value +json+))
 
-  ;; 230ns
+  ;; 260ns
   (title "decode: jackson")
   (let [mapper (ObjectMapper.)
         decode (fn [] (.readValue mapper +json+ Map))]
@@ -118,20 +118,20 @@
 
     (title file)
 
-    ;  1.0µs (10b)
+    ;  0.9µs (10b)
     ;  1.9µs (100b)
     ;  9.2µs (1k)
-    ;  102µs (10k)
-    ;  990µs (100k)
+    ;  110µs (10k)
+    ; 1000µs (100k)
     (title "decode: cheshire")
     (assert (= data (cheshire/parse-string json)))
     (cc/quick-bench (cheshire/parse-string json))
 
-    ; 0.40µs (10b)
-    ;  1.5µs (100b)
-    ;  7.1µs (1k)
-    ;   77µs (10k)
-    ;  760µs (100k)
+    ; 0.32µs (10b)
+    ;  1.3µs (100b)
+    ;  5.9µs (1k)
+    ;   70µs (10k)
+    ;  680µs (100k)
     (title "decode: jsonista")
     (assert (= data (j/read-value json)))
     (cc/quick-bench (j/read-value json))))

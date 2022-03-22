@@ -1,0 +1,1 @@
+{:hooks {:macroexpand {jsonista.core/extend-types jsonista.core/extend-types}}}

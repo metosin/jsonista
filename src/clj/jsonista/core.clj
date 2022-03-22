@@ -58,11 +58,10 @@
       PersistentVectorDeserializer
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory
-                                JsonParser JsonToken)
+    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory JsonParser)
     (com.fasterxml.jackson.databind
       JsonSerializer ObjectMapper SequenceWriter
-      SerializationFeature DeserializationFeature Module)
+      SerializationFeature DeserializationFeature Module MappingIterator)
     (com.fasterxml.jackson.databind.module SimpleModule)
     (java.io InputStream Writer File OutputStream DataOutput Reader)
     (java.net URL)
@@ -163,6 +162,13 @@
 ;; Protocols
 ;;
 
+(defmacro extend-types
+  {:style/indent [1 :defn]}
+  [types & specs]
+  `(do
+     ~@(for [t types]
+         `(extend-type ~t ~@specs))))
+
 (defprotocol ReadValue
   (-read-value [this mapper]))
 
@@ -172,28 +178,7 @@
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper ^bytes this ^Class Object))
 
-  nil
-  (-read-value [_ _])
-
-  File
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
-  URL
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
-  String
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
-  Reader
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
-  InputStream
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object)))
+  nil (-read-value [_ _]))
 
 (defprotocol CreateParser
   (-create-parser [this mapper]))
@@ -202,27 +187,7 @@
 
   (Class/forName "[B")
   (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) ^bytes this))
-
-  File
-  (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) this))
-
-  URL
-  (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) this))
-
-  String
-  (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) this))
-
-  Reader
-  (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) this))
-
-  InputStream
-  (-create-parser [this ^ObjectMapper mapper]
-    (.createParser (.getFactory mapper) this)))
+    (.createParser (.getFactory mapper) ^bytes this)))
 
 (defn ^JsonParser create-parser
   "Create an JsonParser using given ObjectMapper.
@@ -239,29 +204,20 @@
 (extend-protocol ReadValues
 
   (Class/forName "[B")
-  (-read-values [this ^ObjectMapper mapper]
+  (-read-values [^bytes this ^ObjectMapper mapper]
     (.readValues (.readerFor mapper ^Class Object) ^bytes this))
 
   nil
-  (-read-values [_ _])
+  (-read-values [_ _]))
 
-  File
-  (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  URL
-  (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  String
-  (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  Reader
-  (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  InputStream
+(extend-types [File URL String Reader InputStream]
+  ReadValue
+  (-read-value [this ^ObjectMapper mapper]
+    (.readValue mapper this ^Class Object))
+  CreateParser
+  (-create-parser [this ^ObjectMapper mapper]
+    (.createParser (.getFactory mapper) this))
+  ReadValues
   (-read-values [this ^ObjectMapper mapper]
     (.readValues (.readerFor mapper ^Class Object) this)))
 

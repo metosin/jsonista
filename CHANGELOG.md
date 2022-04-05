@@ -1,4 +1,14 @@
-## UNRELEASED
+## 0.3.6. (2022-04-05)
+
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.13.2"] is available but we use "2.13.0"
+[com.fasterxml.jackson.core/jackson-databind "2.13.2.2"] is available but we use "2.13.0"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.13.2"] is available but we use "2.13.0"
+```
+
+## 0.3.5. (2021-12-07)
 
 * implement `com.fasterxml.jackson.databind.deser.ContextualDeserializer` for 30% faster de-serialization of Maps and Vectors.
 * Updated deps:

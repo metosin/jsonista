@@ -16,19 +16,19 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.13.0"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.13.0"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.13.0"]]
+  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.13.2"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.13.2.2"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.13.2"]]
   :profiles {:provided {:dependencies [[org.clojure/clojure "1.10.1"]]}
              :dev {:dependencies [[org.clojure/clojure "1.10.1"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.13.0"]
-                                  [cheshire "5.10.1"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.13.2"]
+                                  [cheshire "5.10.2"]
                                   [com.taoensso/nippy "3.1.1"]
                                   [org.clojure/data.json "2.4.0"]
-                                  [com.cognitect/transit-clj "1.0.324"]
-                                  [org.msgpack/msgpack-core "0.9.0"]
-                                  [org.msgpack/jackson-dataformat-msgpack "0.9.0"
+                                  [com.cognitect/transit-clj "1.0.329"]
+                                  [org.msgpack/msgpack-core "0.9.1"]
+                                  [org.msgpack/jackson-dataformat-msgpack "0.9.1"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
                                   [com.clojure-goes-fast/clj-async-profiler "0.5.1"]
                                   [criterium "0.4.6"]]

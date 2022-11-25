@@ -54,6 +54,9 @@
         (is (= "{\"HELLO\":\"world\"}" (j/write-value-as-string data (j/object-mapper {:encode-key-fn (comp str/upper-case name)}))))))
     (testing ":pretty"
       (is (= "{\n  \"hello\" : \"world\"\n}" (j/write-value-as-string data (j/object-mapper {:pretty true})))))
+    (testing ":strip-nils"
+      (let [data-with-nils {:hello "world" :goodbye nil}]
+        (is (= "{\"hello\":\"world\"}" (j/write-value-as-string data-with-nils (j/object-mapper {:strip-nils true}))))))
     (testing ":escape-non-ascii"
       (is (= "{\"imperial-money\":\"\\u00A3\"}" (j/write-value-as-string {:imperial-money "£"} (j/object-mapper {:escape-non-ascii true})))))
     (testing ":date-format"
@@ -267,4 +270,3 @@
       (j/write-value (FileWriter. file) original)
       (is (= expected (slurp file)))
       (.delete file))))
-

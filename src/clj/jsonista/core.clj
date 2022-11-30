@@ -61,6 +61,7 @@
       SymbolSerializer
       RatioSerializer FunctionalKeywordSerializer)
     (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
+    (com.fasterxml.jackson.annotation JsonInclude$Include)
     (com.fasterxml.jackson.databind
       JsonSerializer ObjectMapper module.SimpleModule
       SerializationFeature DeserializationFeature Module)
@@ -123,6 +124,7 @@
   | ------------------- | ------------------------------------------------- |
   | `:pretty`           | set to true use Jacksons pretty-printing defaults |
   | `:escape-non-ascii` | set to true to escape non ascii characters        |
+  | `:strip-nils`       | remove any keys that have nil values              |
   | `:date-format`      | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`  |
   | `:encode-key-fn`    | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`         | a map of custom encoders where keys should be types and values should be encoder functions |
@@ -149,6 +151,7 @@
                   (cond->
                     (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
                     (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
+                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
                     (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))

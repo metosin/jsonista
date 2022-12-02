@@ -1,3 +1,14 @@
+## 0.3.7 (2022-12-02)
+
+* new options `:strip-nils` to remove any keys that have nil values [#67](https://github.com/metosin/jsonista/pull/67)
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.14.1"] is available but we use "2.13.2"
+[com.fasterxml.jackson.core/jackson-databind "2.14.1"] is available but we use "2.13.2.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.14.1"] is available but we use "2.13.2"
+```
+
 ## 0.3.6. (2022-04-05)
 
 * Updated deps:

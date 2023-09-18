@@ -7,7 +7,8 @@
   :resource-paths ["resources"]
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :java-source-paths ["src/java"]
-  :plugins [[lein-codox "0.10.8"]
+  :plugins [[lein-ancient "1.0.0-RC3"]
+            [lein-codox "0.10.8"]
             [lein-jmh "0.3.0"]]
   :deploy-repositories [["releases" {:url "https://repo.clojars.org/"
                                      :sign-releases false

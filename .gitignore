@@ -11,3 +11,6 @@ pom.xml*
 .#*
 /doc/
 \#*\#
+.clj-kondo
+.cpcache
+.lsp

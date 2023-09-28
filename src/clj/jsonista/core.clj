@@ -63,7 +63,7 @@
    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
    (com.fasterxml.jackson.annotation JsonInclude$Include)
    (com.fasterxml.jackson.databind
-    JsonSerializer ObjectMapper module.SimpleModule
+    JsonSerializer ObjectMapper
     SerializationFeature DeserializationFeature Module)
    (com.fasterxml.jackson.databind.module SimpleModule)
    (java.io InputStream Writer File OutputStream DataOutput Reader)
@@ -88,13 +88,13 @@
                            (DateSerializer. date-format)
                            (DateSerializer.)))
     (as-> module
-          (doseq [[type encoder] encoders]
-            (cond
-              (instance? JsonSerializer encoder) (.addSerializer module type encoder)
-              (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
-              :else (throw (ex-info
-                             (str "Can't register encoder " encoder " for type " type)
-                             {:type type, :encoder encoder})))))
+      (doseq [[type encoder] encoders]
+        (cond
+          (instance? JsonSerializer encoder) (.addSerializer module type encoder)
+          (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
+          :else (throw (ex-info
+                        (str "Can't register encoder " encoder " for type " type)
+                        {:type type, :encoder encoder})))))
     (cond->
       (true? decode-key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
       (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
@@ -150,11 +150,11 @@
                   (.registerModule (JavaTimeModule.))
                   (.registerModule (clojure-module options))
                   (cond->
-                      (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
-                      (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-                      (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-                      (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
-                      (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+                    (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
+                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
+                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
+                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)

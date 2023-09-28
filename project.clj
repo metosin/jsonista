@@ -1,4 +1,4 @@
-(defproject metosin/jsonista "0.3.7"
+(defproject metosin/jsonista "0.3.8"
   :description "Clojure library for fast JSON encoding and decoding."
   :url "https://github.com/metosin/jsonista"
   :license {:name "Eclipse Public License"

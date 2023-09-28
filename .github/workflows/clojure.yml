@@ -24,7 +24,7 @@ jobs:
         distribution: zulu
         java-version: ${{ matrix.jdk }}
     - name: Setup Clojure
-      uses: DeLaGuardo/setup-clojure@3.1
+      uses: DeLaGuardo/setup-clojure@master
       with:
         lein: 2.9.4
     - name: Run tests

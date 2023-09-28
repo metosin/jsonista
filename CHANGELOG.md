@@ -1,3 +1,14 @@
+## 0.3.8 (2022-09-28)
+
+* new options `:order-by-keys` to sort map keys alphabetically [#70](https://github.com/metosin/jsonista/pull/70)
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.15.2"] is available but we use "2.14.1"
+[com.fasterxml.jackson.core/jackson-databind "2.15.2"] is available but we use "2.41.1"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.15.2"] is available but we use "2.14.1"
+```
+
 ## 0.3.7 (2022-12-02)
 
 * new options `:strip-nils` to remove any keys that have nil values [#67](https://github.com/metosin/jsonista/pull/67)

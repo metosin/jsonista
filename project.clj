@@ -24,14 +24,14 @@
              :dev {:dependencies [[org.clojure/clojure "1.10.1"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
                                   [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.15.2"]
-                                  [cheshire "5.11.0"]
+                                  [cheshire "5.12.0"]
                                   [com.taoensso/nippy "3.2.0"]
                                   [org.clojure/data.json "2.4.0"]
-                                  [com.cognitect/transit-clj "1.0.329"]
-                                  [org.msgpack/msgpack-core "0.9.3"]
-                                  [org.msgpack/jackson-dataformat-msgpack "0.9.3"
+                                  [com.cognitect/transit-clj "1.0.333"]
+                                  [org.msgpack/msgpack-core "0.9.6"]
+                                  [org.msgpack/jackson-dataformat-msgpack "0.9.6"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
-                                  [com.clojure-goes-fast/clj-async-profiler "1.0.3"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.0.5"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :virgil {:plugins [[lein-virgil "0.1.9"]]}

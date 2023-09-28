@@ -48,29 +48,29 @@
   json_perf_test.clj). On the other hand, Cheshire has a wider set of features
   and has been used in production much more."
   (:import
-    (jsonista.jackson
-      DateSerializer
-      FunctionalKeyDeserializer
-      FunctionalSerializer
-      KeywordSerializer
-      KeywordKeyDeserializer
-      HashMapDeserializer
-      ArrayListDeserializer
-      PersistentHashMapDeserializer
-      PersistentVectorDeserializer
-      SymbolSerializer
-      RatioSerializer FunctionalKeywordSerializer)
-    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
-    (com.fasterxml.jackson.annotation JsonInclude$Include)
-    (com.fasterxml.jackson.databind
-      JsonSerializer ObjectMapper module.SimpleModule
-      SerializationFeature DeserializationFeature Module)
-    (com.fasterxml.jackson.databind.module SimpleModule)
-    (java.io InputStream Writer File OutputStream DataOutput Reader)
-    (java.net URL)
-    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
-    (java.util List Map Date)
-    (clojure.lang Keyword Ratio Symbol)))
+   (jsonista.jackson
+    DateSerializer
+    FunctionalKeyDeserializer
+    FunctionalSerializer
+    KeywordSerializer
+    KeywordKeyDeserializer
+    HashMapDeserializer
+    ArrayListDeserializer
+    PersistentHashMapDeserializer
+    PersistentVectorDeserializer
+    SymbolSerializer
+    RatioSerializer FunctionalKeywordSerializer)
+   (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
+   (com.fasterxml.jackson.annotation JsonInclude$Include)
+   (com.fasterxml.jackson.databind
+    JsonSerializer ObjectMapper module.SimpleModule
+    SerializationFeature DeserializationFeature Module)
+   (com.fasterxml.jackson.databind.module SimpleModule)
+   (java.io InputStream Writer File OutputStream DataOutput Reader)
+   (java.net URL)
+   (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
+   (java.util List Map Date)
+   (clojure.lang Keyword Ratio Symbol)))
 
 (defn- ^Module clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
@@ -122,6 +122,7 @@
 
   | Encoding options    |                                                   |
   | ------------------- | ------------------------------------------------- |
+  | `:order-by-keys`    | set to true to order map keys alphabetically      |
   | `:pretty`           | set to true use Jacksons pretty-printing defaults |
   | `:escape-non-ascii` | set to true to escape non ascii characters        |
   | `:strip-nils`       | remove any keys that have nil values              |
@@ -149,10 +150,11 @@
                   (.registerModule (JavaTimeModule.))
                   (.registerModule (clojure-module options))
                   (cond->
-                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
-                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+                      (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
+                      (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+                      (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
+                      (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
+                      (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)

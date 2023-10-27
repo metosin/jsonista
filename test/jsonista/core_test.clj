@@ -240,6 +240,12 @@
     (testing "String"
       (is (= original (j/read-value input-string))))
 
+    (testing "String_Specfied_Null"
+      (let [json-string-with-null-value "{\"value\": \"null\"}"
+            clj-json-map                (j/read-value json-string-with-null-value)]
+        (is (= nil (get clj-json-map "value")))
+        (is (= {"value" nil} clj-json-map))))
+
     (testing "InputStream"
       (is (= original (j/read-value (str->input-stream input-string)))))
 

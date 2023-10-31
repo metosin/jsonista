@@ -1,4 +1,4 @@
-## 0.3.8 (2022-09-28)
+## 0.3.8 (2023-09-28)
 
 * new options `:order-by-keys` to sort map keys alphabetically [#70](https://github.com/metosin/jsonista/pull/70)
 * Updated deps:

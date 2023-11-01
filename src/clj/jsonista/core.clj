@@ -59,6 +59,7 @@
     PersistentHashMapDeserializer
     PersistentVectorDeserializer
     SymbolSerializer
+    StringDeserializer
     RatioSerializer FunctionalKeywordSerializer)
    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
    (com.fasterxml.jackson.annotation JsonInclude$Include)
@@ -81,6 +82,7 @@
   (doto (SimpleModule. "Clojure")
     (.addDeserializer List (PersistentVectorDeserializer.))
     (.addDeserializer Map (PersistentHashMapDeserializer.))
+    (.addDeserializer String (StringDeserializer.))
     (.addSerializer Keyword (KeywordSerializer. false))
     (.addSerializer Ratio (RatioSerializer.))
     (.addSerializer Symbol (SymbolSerializer.))

@@ -88,18 +88,18 @@
                            (DateSerializer. date-format)
                            (DateSerializer.)))
     (as-> module
-      (doseq [[type encoder] encoders]
-        (cond
-          (instance? JsonSerializer encoder) (.addSerializer module type encoder)
-          (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
-          :else (throw (ex-info
-                        (str "Can't register encoder " encoder " for type " type)
-                        {:type type, :encoder encoder})))))
+          (doseq [[type encoder] encoders]
+            (cond
+              (instance? JsonSerializer encoder) (.addSerializer module type encoder)
+              (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
+              :else (throw (ex-info
+                            (str "Can't register encoder " encoder " for type " type)
+                            {:type type, :encoder encoder})))))
     (cond->
-      (true? decode-key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
-      (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
-      (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
-      (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
+     (true? decode-key-fn) (.addKeyDeserializer Object (KeywordKeyDeserializer.))
+     (fn? decode-key-fn) (.addKeyDeserializer Object (FunctionalKeyDeserializer. decode-key-fn))
+     (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
+     (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
 
 (defn ^:no-doc ^Module java-collection-module
   "Create a Jackson Databind module to support Java HashMap and ArrayList."
@@ -120,15 +120,16 @@
   | `:factory`          | A Jackson JsonFactory for this given mapper                |
   | `:mapper`           | The base ObjectMapper to start with - overrides `:factory` |
 
-  | Encoding options    |                                                   |
-  | ------------------- | ------------------------------------------------- |
-  | `:order-by-keys`    | set to true to order map keys alphabetically      |
-  | `:pretty`           | set to true use Jacksons pretty-printing defaults |
-  | `:escape-non-ascii` | set to true to escape non ascii characters        |
-  | `:strip-nils`       | remove any keys that have nil values              |
-  | `:date-format`      | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`  |
-  | `:encode-key-fn`    | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
-  | `:encoders`         | a map of custom encoders where keys should be types and values should be encoder functions |
+  | Encoding options              |                                                                                                                                   |
+  |-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+  | `:order-by-keys`              | set to true to order map keys alphabetically                                                                                      |
+  | `:pretty`                     | set to true use Jacksons pretty-printing defaults                                                                                 |
+  | `:escape-non-ascii`           | set to true to escape non ascii characters                                                                                        |
+  | `:strip-nils`                 | remove any keys that have nil values                                                                                              |
+  | `:do-not-fail-on-empty-beans` | serialize objects with no accessors as empty objects instead of throwing an exception                                             |
+  | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
+  | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
+  | `:encoders`                   | a map of custom encoders where keys should be types and values should be encoder functions                                        |
 
   Encoder functions take two parameters: the value to be encoded and a
   JsonGenerator object. The function should call JsonGenerator methods to emit
@@ -150,11 +151,12 @@
                   (.registerModule (JavaTimeModule.))
                   (.registerModule (clojure-module options))
                   (cond->
-                    (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
-                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
-                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+                   (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
+                   (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
+                   (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
+                   (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
+                   (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
+                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)

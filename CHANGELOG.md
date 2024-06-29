@@ -1,3 +1,14 @@
+## 0.3.9 (2023-06-29)
+
+* add `:do-not-fail-on-empty-beans` option [#75](https://github.com/metosin/jsonista/pull/75)
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.17.1"] is available but we use "2.15.2"
+[com.fasterxml.jackson.core/jackson-databind "2.17.1"] is available but we use "2.15.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.17.1"] is available but we use "2.15.2"
+```
+
 ## 0.3.8 (2023-09-28)
 
 * new options `:order-by-keys` to sort map keys alphabetically [#70](https://github.com/metosin/jsonista/pull/70)

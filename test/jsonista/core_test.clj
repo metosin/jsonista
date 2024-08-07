@@ -55,6 +55,9 @@
     (testing ":pretty"
       (is (= "{\n  \"hello\" : \"world\"\n}" (j/write-value-as-string data (j/object-mapper {:pretty true})))))
     (testing ":strip-nils"
+      (let [data-with-nils {:hello "world" :goodbye nil}]
+        (is (= "{\"hello\":\"world\"}" (j/write-value-as-string data-with-nils (j/object-mapper {:strip-nils true}))))))
+    (testing ":strip-nils doesn't strip other empties"
       (let [data-with-nils {:hello "world" :goodbye nil :empty-string "" :empty-map {}}]
         (is (= "{\"hello\":\"world\",\"empty-string\":\"\",\"empty-map\":{}}" (j/write-value-as-string data-with-nils (j/object-mapper {:strip-nils true}))))))
     (testing ":escape-non-ascii"

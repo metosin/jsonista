@@ -1,3 +1,11 @@
+## Unreleased
+
+* The `:strip-nils` option now doesn't strip empty values like `{}` or `""`.
+  Use the new `:strip-empties` option if you want the old behaviour.
+  Thanks to [@dominicfreeston](https://github.com/dominicfreeston)!
+  [#78](https://github.com/metosin/jsonista/pull/78),
+  [#79](https://github.com/metosin/jsonista/pull/79)
+
 ## 0.3.9 (2023-06-29)
 
 * add `:do-not-fail-on-empty-beans` option [#75](https://github.com/metosin/jsonista/pull/75)

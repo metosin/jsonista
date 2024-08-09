@@ -1,4 +1,4 @@
-## Unreleased
+## 0.3.10 (2024-08-09)
 
 * The `:strip-nils` option now doesn't strip empty values like `{}` or `""`.
   Use the new `:strip-empties` option if you want the old behaviour.
@@ -14,7 +14,7 @@
 [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.17.2"] is available but we use "2.17.1"
 ```
 
-## 0.3.9 (2023-06-29)
+## 0.3.9 (2024-06-29)
 
 * add `:do-not-fail-on-empty-beans` option [#75](https://github.com/metosin/jsonista/pull/75)
 * Updated deps:

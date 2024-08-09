@@ -126,6 +126,7 @@
   | `:pretty`                     | set to true use Jacksons pretty-printing defaults                                                                                 |
   | `:escape-non-ascii`           | set to true to escape non ascii characters                                                                                        |
   | `:strip-nils`                 | remove any keys that have nil values                                                                                              |
+  | `:strip-empties`              | remove any keys that have nil or empty (\"\", {}, [], etc) values                                                                 |
   | `:do-not-fail-on-empty-beans` | serialize objects with no accessors as empty objects instead of throwing an exception                                             |
   | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
   | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
@@ -155,6 +156,7 @@
                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_NULL)
+                   (:strip-empties options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
                    (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]

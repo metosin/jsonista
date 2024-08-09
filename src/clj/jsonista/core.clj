@@ -154,7 +154,7 @@
                    (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
                    (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
                    (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-                   (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
+                   (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_NULL)
                    (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
      (doseq [module (:modules options)]

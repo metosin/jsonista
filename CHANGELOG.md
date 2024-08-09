@@ -5,6 +5,14 @@
   Thanks to [@dominicfreeston](https://github.com/dominicfreeston)!
   [#78](https://github.com/metosin/jsonista/pull/78),
   [#79](https://github.com/metosin/jsonista/pull/79)
+* Updated deps:
+
+```clj
+[com.fasterxml.jackson.core/jackson-core "2.17.2"] is available but we use "2.17.1"
+[com.fasterxml.jackson.core/jackson-databind "2.17.2"] is available but we use "2.17.1"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.17.2"] is available but we use "2.17.1"
+[com.fasterxml.jackson.datatype/jackson-datatype-joda "2.17.2"] is available but we use "2.17.1"
+```
 
 ## 0.3.9 (2023-06-29)
 

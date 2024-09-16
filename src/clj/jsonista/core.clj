@@ -131,6 +131,7 @@
   | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
   | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`                   | a map of custom encoders where keys should be types and values should be encoder functions                                        |
+  | `:close`                      | close OutputStreams & other closeable targets after write-value (default: true) |
 
   Encoder functions take two parameters: the value to be encoded and a
   JsonGenerator object. The function should call JsonGenerator methods to emit
@@ -138,8 +139,8 @@
 
   | Decoding options    |                                                                |
   | ------------------- | -------------------------------------------------------------- |
-  | `:decode-key-fn`    |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
-  | `:bigdecimals`      |  true to decode doubles as BigDecimals (default: false) |"
+  | `:decode-key-fn`    | true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
+  | `:bigdecimals`      | true to decode doubles as BigDecimals (default: false) |"
   ([] (object-mapper {}))
   ([options]
    (let [factory (:factory options)
@@ -158,7 +159,8 @@
                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_NULL)
                    (:strip-empties options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
                    (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
-                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))
+                   (contains? options :close) (.configure JsonGenerator$Feature/AUTO_CLOSE_TARGET (boolean (:close options)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)

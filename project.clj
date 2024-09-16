@@ -34,7 +34,6 @@
                                   [com.clojure-goes-fast/clj-async-profiler "1.2.2"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
-             :virgil {:plugins [[lein-virgil "0.1.9"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.11.3"]]}
              :1.9 {:dependencies [[org.clojure/clojure "1.11.3"]]}
              :jmh {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
@@ -43,4 +42,4 @@
                                          "-Dclojure.compiler.direct-linking=true"]}}
   :aliases {"all" ["with-profile" "default:dev:default:dev,1.8:dev,1.9"]
             "perf" ["with-profile" "default,dev,perf"]
-            "repl" ["with-profile" "default,dev,virgil" "repl"]})
+            "repl" ["with-profile" "default,dev" "repl"]})

@@ -305,28 +305,41 @@
       (.delete file))))
 
 (deftest write-values-types
-  (let [original [{"ok" 1}]
-        expected (j/write-value-as-string original)
+  (let [original [{"ok" 1} {"ok" 2}]
+        expected-array (j/write-value-as-string original)
+        expected-lines (str/join "\n" (mapv j/write-value-as-string original))
         file (tmp-file)]
 
     (testing "File"
       (j/write-values file original)
-      (is (= expected (slurp file)))
+      (is (= expected-lines (slurp file)))
+      (.delete file)
+      (j/write-values-as-array file original)
+      (is (= expected-array (slurp file)))
       (.delete file))
 
     (testing "OutputStream"
       (j/write-values (FileOutputStream. file) original)
-      (is (= expected (slurp file)))
+      (is (= expected-lines (slurp file)))
+      (.delete file)
+      (j/write-values-as-array (FileOutputStream. file) original)
+      (is (= expected-array (slurp file)))
       (.delete file))
 
     (testing "DataOutput"
       (j/write-values (RandomAccessFile. file "rw") original)
-      (is (= expected (slurp file)))
+      (is (= expected-lines (slurp file)))
+      (.delete file)
+      (j/write-values-as-array (RandomAccessFile. file "rw") original)
+      (is (= expected-array (slurp file)))
       (.delete file))
 
     (testing "Writer"
       (j/write-values (FileWriter. file) original)
-      (is (= expected (slurp file)))
+      (is (= expected-lines (slurp file)))
+      (.delete file)
+      (j/write-values-as-array (FileWriter. file) original)
+      (is (= expected-array (slurp file)))
       (.delete file))))
 
 (deftest read-values-iteration
@@ -344,12 +357,23 @@
     (is (= (into [] xf original) (into [] xf it)))))
 
 (deftest write-values-iterable
+  (let [original [{"ok" 1} {"ok" 2}]
+        xf (map #(update % "ok" inc))
+        expected "{\"ok\":2}\n{\"ok\":3}"
+        file (tmp-file)
+        eduction (->Eduction xf original)]
+
+    (j/write-values file eduction)
+    (is (= expected (slurp file)))
+    (.delete file)))
+
+(deftest write-values-as-array-iterable
   (let [original [{"ok" 1}]
         xf (map #(update % "ok" inc))
         expected (j/write-value-as-string (into [] xf original))
         file (tmp-file)
         eduction (->Eduction xf original)]
 
-    (j/write-values file eduction)
+    (j/write-values-as-array file eduction)
     (is (= expected (slurp file)))
     (.delete file)))

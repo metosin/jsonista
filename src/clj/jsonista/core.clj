@@ -280,35 +280,46 @@
     (.writeAll w this)))
 
 (defprotocol WriteValues
-  (-write-values [this values mapper]))
+  (-write-values [this values mapper])
+  (-write-values-as-array [this values mapper]))
 
 (defmacro ^:private -write-values*
-  [this value mapper]
+  [method this value mapper]
   `(doto ^SequenceWriter
        (-write-all
         ~value
         (-> ~mapper
             (.writerFor Object)
+            (.withRootValueSeparator "\n")
             (.without SerializationFeature/FLUSH_AFTER_WRITE_VALUE)
-            (.writeValuesAsArray ~this)))
+            (. ~method ~this)))
      (.close)))
+
 
 (extend-protocol WriteValues
   File
   (-write-values [this value ^ObjectMapper mapper]
-    (-write-values* this value mapper))
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
 
   OutputStream
   (-write-values [this value ^ObjectMapper mapper]
-    (-write-values* this value mapper))
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
 
   DataOutput
   (-write-values [this value ^ObjectMapper mapper]
-    (-write-values* this value mapper))
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
 
   Writer
   (-write-values [this value ^ObjectMapper mapper]
-    (-write-values* this value mapper)))
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper)))
 
 ;;
 ;; public api
@@ -394,14 +405,27 @@
    (wrap-values (-read-values object mapper))))
 
 (defn write-values
-  "Encode values as JSON and write using the provided [[WriteValue]] instance.
-  By default, File, OutputStream, DataOutput and Writer are supported.
+  "Encodes a sequence of values as JSON, separating values with a line return.
+  By default, `to` can be a File, OutputStream, DataOutput or Writer.
 
-  By default, values can be an array or an Iterable.
+  By default, `values` can be an array or an Iterable.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options."
-  ([to object]
-   (-write-values to object default-object-mapper))
-  ([to object ^ObjectMapper mapper]
-   (-write-values to object mapper)))
+  ([to values]
+   (-write-values to values default-object-mapper))
+  ([to values ^ObjectMapper mapper]
+   (-write-values to values mapper)))
+
+(defn write-values-as-array
+  "Encodes a sequence of values as a JSON array.
+  By default, `to` can be a File, OutputStream, DataOutput or Writer.
+
+  By default, `values` can be an array or an Iterable.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([to values]
+   (-write-values-as-array to values default-object-mapper))
+  ([to values ^ObjectMapper mapper]
+   (-write-values-as-array to values mapper)))

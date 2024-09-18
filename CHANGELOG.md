@@ -1,3 +1,9 @@
+## 0.3.11 (2024-09-18)
+
+* New streaming support, including `read-values` and `write-values`.
+  See [docs/streaming.md](docs/streaming.md). Thanks to [@bsless](https://github.com/bsless)!
+  [#82](https://github.com/metosin/jsonista/pull/82)
+
 ## 0.3.10 (2024-08-09)
 
 * The `:strip-nils` option now doesn't strip empty values like `{}` or `""`.

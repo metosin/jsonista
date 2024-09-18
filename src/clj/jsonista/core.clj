@@ -63,13 +63,13 @@
    (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
    (com.fasterxml.jackson.annotation JsonInclude$Include)
    (com.fasterxml.jackson.databind
-    JsonSerializer ObjectMapper
+    JsonSerializer ObjectMapper SequenceWriter
     SerializationFeature DeserializationFeature Module)
    (com.fasterxml.jackson.databind.module SimpleModule)
    (java.io InputStream Writer File OutputStream DataOutput Reader)
    (java.net URL)
    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
-   (java.util List Map Date)
+   (java.util Iterator List Map Date)
    (clojure.lang Keyword Ratio Symbol)))
 
 (defn- ^Module clojure-module
@@ -131,6 +131,7 @@
   | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
   | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`                   | a map of custom encoders where keys should be types and values should be encoder functions                                        |
+  | `:close`                      | close OutputStreams & other closeable targets after write-value (default: true) |
 
   Encoder functions take two parameters: the value to be encoded and a
   JsonGenerator object. The function should call JsonGenerator methods to emit
@@ -138,8 +139,8 @@
 
   | Decoding options    |                                                                |
   | ------------------- | -------------------------------------------------------------- |
-  | `:decode-key-fn`    |  true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
-  | `:bigdecimals`      |  true to decode doubles as BigDecimals (default: false) |"
+  | `:decode-key-fn`    | true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
+  | `:bigdecimals`      | true to decode doubles as BigDecimals (default: false) |"
   ([] (object-mapper {}))
   ([options]
    (let [factory (:factory options)
@@ -158,7 +159,8 @@
                    (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_NULL)
                    (:strip-empties options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
                    (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
-                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))))]
+                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))
+                   (contains? options :close) (.configure JsonGenerator$Feature/AUTO_CLOSE_TARGET (boolean (:close options)))))]
      (doseq [module (:modules options)]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)
@@ -212,6 +214,38 @@
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object)))
 
+(defprotocol ReadValues
+  (-read-values [this mapper]))
+
+(extend-protocol ReadValues
+
+  (Class/forName "[B")
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) ^bytes this))
+
+  nil
+  (-read-values [_ _])
+
+  File
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  URL
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  String
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  Reader
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this))
+
+  InputStream
+  (-read-values [this ^ObjectMapper mapper]
+    (.readValues (.readerFor mapper ^Class Object) this)))
+
 (defprotocol WriteValue
   (-write-value [this value mapper]))
 
@@ -231,6 +265,61 @@
   Writer
   (-write-value [this value ^ObjectMapper mapper]
     (.writeValue mapper this value)))
+
+(defprotocol WriteAll
+  (-write-all [this ^SequenceWriter writer]))
+
+(extend-protocol WriteAll
+
+  (Class/forName "[Ljava.lang.Object;")
+  (-write-all [this ^SequenceWriter w]
+    (.writeAll w ^"[Ljava.lang.Object;" this))
+
+  Iterable
+  (-write-all [this ^SequenceWriter w]
+    (.writeAll w this)))
+
+(defprotocol WriteValues
+  (-write-values [this values mapper])
+  (-write-values-as-array [this values mapper]))
+
+(defmacro ^:private -write-values*
+  [method this value mapper]
+  `(doto ^SequenceWriter
+       (-write-all
+        ~value
+        (-> ~mapper
+            (.writerFor Object)
+            (.withRootValueSeparator "\n")
+            (.without SerializationFeature/FLUSH_AFTER_WRITE_VALUE)
+            (. ~method ~this)))
+     (.close)))
+
+
+(extend-protocol WriteValues
+  File
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
+
+  OutputStream
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
+
+  DataOutput
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper))
+
+  Writer
+  (-write-values [this value ^ObjectMapper mapper]
+    (-write-values* writeValues this value mapper))
+  (-write-values-as-array [this value ^ObjectMapper mapper]
+    (-write-values* writeValuesAsArray this value mapper)))
 
 ;;
 ;; public api
@@ -277,3 +366,66 @@
    (-write-value to object default-object-mapper))
   ([to object ^ObjectMapper mapper]
    (-write-value to object mapper)))
+
+(defn- wrap-values
+  [^Iterator iterator]
+  (when iterator
+    (reify
+      Iterable
+      (iterator [this] iterator)
+      Iterator
+      (hasNext [this] (.hasNext iterator))
+      (next [this] (.next iterator))
+      (remove [this] (.remove iterator))
+      clojure.lang.IReduceInit
+      (reduce [_ f val]
+        (loop [ret val]
+          (if (.hasNext iterator)
+            (let [ret (f ret (.next iterator))]
+              (if (reduced? ret)
+                @ret
+                (recur ret)))
+            ret)))
+      clojure.lang.Sequential)))
+
+(defn read-values
+  "Decodes a sequence of values from a JSON as an iterator
+  from anything that satisfies [[ReadValue]] protocol.
+  By default, File, URL, String, Reader and InputStream are supported.
+
+  The returned object is an Iterable, Iterator and IReduceInit.
+  It can be reduced on via [[reduce]] and turned into a lazy sequence
+  via [[iterator-seq]].
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([object]
+   (wrap-values (-read-values object default-object-mapper)))
+  ([object ^ObjectMapper mapper]
+   (wrap-values (-read-values object mapper))))
+
+(defn write-values
+  "Encodes a sequence of values as JSON, separating values with a line return.
+  By default, `to` can be a File, OutputStream, DataOutput or Writer.
+
+  By default, `values` can be an array or an Iterable.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([to values]
+   (-write-values to values default-object-mapper))
+  ([to values ^ObjectMapper mapper]
+   (-write-values to values mapper)))
+
+(defn write-values-as-array
+  "Encodes a sequence of values as a JSON array.
+  By default, `to` can be a File, OutputStream, DataOutput or Writer.
+
+  By default, `values` can be an array or an Iterable.
+
+  To configure, pass in an ObjectMapper created with [[object-mapper]],
+  see [[object-mapper]] docstring for the available options."
+  ([to values]
+   (-write-values-as-array to values default-object-mapper))
+  ([to values ^ObjectMapper mapper]
+   (-write-values-as-array to values mapper)))

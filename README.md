@@ -131,6 +131,10 @@ includes both reading and writing support.
 
 In simple [perf tests](https://github.com/metosin/jsonista/blob/master/test/jsonista/json_perf_test.clj), tagged JSON is much faster than EDN or Transit.
 
+## Streaming
+
+See [docs/streaming.md](docs/streaming.md).
+
 ## Performance
 
 * All standard encoders and decoders are written in Java

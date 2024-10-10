@@ -15,6 +15,10 @@ Faster than [data.json](https://github.com/clojure/data.json) or [Cheshire](http
 Blogged:
 * [Faster JSON processing with jsonista](http://www.metosin.fi/blog/faster-json-processing-with-jsonista/)
 
+> Hi! We are [Metosin](https://metosin.fi), a consulting company. These libraries have evolved out of the work we do for our clients.
+> We maintain & develop this project, for you, for free. Issues and pull requests welcome!
+> However, if you want more help using the libraries, or want us to build something as cool for you, consider our [commercial support](https://www.metosin.fi/en/open-source-support).
+
 ## Latest version
 
 [![Clojars Project](http://clojars.org/metosin/jsonista/latest-version.svg)](http://clojars.org/metosin/jsonista)

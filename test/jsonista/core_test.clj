@@ -377,3 +377,15 @@
     (j/write-values-as-array file eduction)
     (is (= expected (slurp file)))
     (.delete file)))
+
+;; clojure 1.12 seems to have changed delay so that jackson barfs on it
+;; this test documents the old behaviour that we preserve with our custom DelaySerializer
+(deftest test-delay
+  (let [d (delay 1)
+        d2 (delay (list :a 1))]
+    (is (= "{\"realized\":false}" (j/write-value-as-string d)))
+    (is (= "{\"realized\":false}" (j/write-value-as-string d2)))
+    (force d)
+    (force d2)
+    (is (= "{\"realized\":true}" (j/write-value-as-string d)))
+    (is (= "{\"realized\":true}" (j/write-value-as-string d2)))))

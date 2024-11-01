@@ -20,8 +20,8 @@
   :dependencies [[com.fasterxml.jackson.core/jackson-core "2.17.2"]
                  [com.fasterxml.jackson.core/jackson-databind "2.17.2"]
                  [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.17.2"]]
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.11.3"]]}
-             :dev {:dependencies [[org.clojure/clojure "1.11.3"]
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.12.0"]]}
+             :dev {:dependencies [[org.clojure/clojure "1.12.0"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
                                   [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.17.2"]
                                   [cheshire "5.13.0"]
@@ -34,12 +34,11 @@
                                   [com.clojure-goes-fast/clj-async-profiler "1.2.2"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
-             :1.8 {:dependencies [[org.clojure/clojure "1.11.3"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.11.3"]]}
+             :1.11 {:dependencies [[org.clojure/clojure "1.11.3"]]}
              :jmh {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}
-  :aliases {"all" ["with-profile" "default:dev:default:dev,1.8:dev,1.9"]
+  :aliases {"all" ["with-profile" "default:dev:default:dev,1.11"]
             "perf" ["with-profile" "default,dev,perf"]
             "repl" ["with-profile" "default,dev" "repl"]})

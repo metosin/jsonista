@@ -50,6 +50,7 @@
   (:import
    (jsonista.jackson
     DateSerializer
+    DelaySerializer
     FunctionalKeyDeserializer
     FunctionalSerializer
     KeywordSerializer
@@ -70,7 +71,7 @@
    (java.net URL)
    (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
    (java.util Iterator List Map Date)
-   (clojure.lang Keyword Ratio Symbol)))
+   (clojure.lang Delay Keyword Ratio Symbol)))
 
 (defn- ^Module clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
@@ -87,6 +88,7 @@
     (.addSerializer Date (if date-format
                            (DateSerializer. date-format)
                            (DateSerializer.)))
+    (.addSerializer Delay (DelaySerializer.))
     (as-> module
           (doseq [[type encoder] encoders]
             (cond

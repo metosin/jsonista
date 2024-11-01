@@ -1,3 +1,7 @@
+## 0.3.12 (2024-11-01)
+
+* Fix `delay` serialization on Clojure 1.12 [#84](https://github.com/metosin/jsonista/pull/84)
+
 ## 0.3.11 (2024-09-18)
 
 * New streaming support, including `read-values` and `write-values`.

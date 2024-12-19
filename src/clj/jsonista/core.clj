@@ -41,6 +41,12 @@
          (json/write-value-as-string (java.awt.Color. 1 2 3) mapper))
        ;; => \"\\\"java.awt.Color[r=1,g=2,b=3]\\\"\"
 
+  ## Exceptions
+
+  Jsonista just passes on all and any exceptions from Jackson. We've
+  tried to document the possible exceptions in the docstrings, but you
+  might also want to check the Jackson API docs.
+
   ## Jsonista vs. Cheshire
 
   jsonista uses Jackson Databind while Cheshire uses Jackson Core. In our
@@ -333,7 +339,12 @@
   File, URL, String, Reader and InputStream are supported.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
-  see [[object-mapper]] docstring for the available options."
+  see [[object-mapper]] docstring for the available options.
+
+  Throws the same exceptions as ObjectMapper.readValue():
+    IOException,
+    com.fasterxml.jackson.core.exc.StreamReadException,
+    com.fasterxml.jackson.databind.DatabindException"
   ([object]
    (-read-value object default-object-mapper))
   ([object ^ObjectMapper mapper]
@@ -342,7 +353,10 @@
 (defn ^String write-value-as-string
   "Encode a value as a JSON string.
 
-  To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  To configure, pass in an ObjectMapper created with [[object-mapper]].
+
+  Throws the same exceptions as ObjectMapper.writeValueAsString():
+    com.fasterxml.jackson.core.JsonProcessingException"
   ([object]
    (.writeValueAsString default-object-mapper object))
   ([object ^ObjectMapper mapper]
@@ -351,7 +365,10 @@
 (defn write-value-as-bytes
   "Encode a value as a JSON byte-array.
 
-  To configure, pass in an ObjectMapper created with [[object-mapper]]."
+  To configure, pass in an ObjectMapper created with [[object-mapper]].
+
+  Throws the same exceptions as ObjectMapper.writeValueAsBytes():
+    com.fasterxml.jackson.core.JsonProcessingException"
   {:tag 'bytes}
   ([object]
    (.writeValueAsBytes default-object-mapper object))
@@ -363,7 +380,12 @@
   By default, File, OutputStream, DataOutput and Writer are supported.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
-  see [[object-mapper]] docstring for the available options."
+  see [[object-mapper]] docstring for the available options.
+
+  Throws the same exceptions as ObjectMapper.writeValue():
+    IOException,
+    com.fasterxml.jackson.core.exc.StreamWriteException,
+    com.fasterxml.jackson.databind.DatabindException"
   ([to object]
    (-write-value to object default-object-mapper))
   ([to object ^ObjectMapper mapper]
@@ -400,7 +422,9 @@
   via [[iterator-seq]].
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
-  see [[object-mapper]] docstring for the available options."
+  see [[object-mapper]] docstring for the available options.
+
+  Throws IOException."
   ([object]
    (wrap-values (-read-values object default-object-mapper)))
   ([object ^ObjectMapper mapper]
@@ -413,7 +437,9 @@
   By default, `values` can be an array or an Iterable.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
-  see [[object-mapper]] docstring for the available options."
+  see [[object-mapper]] docstring for the available options.
+
+  Throws IOException."
   ([to values]
    (-write-values to values default-object-mapper))
   ([to values ^ObjectMapper mapper]
@@ -426,7 +452,9 @@
   By default, `values` can be an array or an Iterable.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
-  see [[object-mapper]] docstring for the available options."
+  see [[object-mapper]] docstring for the available options.
+
+  Throws IOException."
   ([to values]
    (-write-values-as-array to values default-object-mapper))
   ([to values ^ObjectMapper mapper]

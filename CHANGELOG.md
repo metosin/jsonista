@@ -1,3 +1,13 @@
+## 0.3.13 (2024-12-19)
+
+* Document thrown exceptions
+* Updated deps:
+```
+[com.fasterxml.jackson.core/jackson-core "2.18.2"] is available but we use "2.17.2"
+[com.fasterxml.jackson.core/jackson-databind "2.18.2"] is available but we use "2.17.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.18.2"] is available but we use "2.17.2"
+```
+
 ## 0.3.12 (2024-11-01)
 
 * Fix `delay` serialization on Clojure 1.12 [#84](https://github.com/metosin/jsonista/pull/84)

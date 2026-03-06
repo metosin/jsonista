@@ -1,3 +1,12 @@
+## 0.3.14 (2026-03-06)
+
+* Updated deps:
+```
+[com.fasterxml.jackson.core/jackson-core "2.21.1"]
+[com.fasterxml.jackson.core/jackson-databind "2.21.1"]
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.21.1"]
+```
+
 ## 0.3.13 (2024-12-19)
 
 * Document thrown exceptions

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, Object>> implements ContextualDeserializer {
@@ -43,15 +44,33 @@ public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, O
   @Override
   @SuppressWarnings("unchecked")
   public Map<String, Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-    ITransientMap t = PersistentHashMap.EMPTY.asTransient();
+    Object[] entries = new Object[16];
+    int size = 0;
     while (p.nextToken() != JsonToken.END_OBJECT) {
       Object key = _keyDeserializer.deserializeKey(p.getCurrentName(), ctxt);
       p.nextToken();
       Object value = _valueDeserializer.deserialize(p, ctxt);
-      t = t.assoc(key, value);
+      if (size < 8) {
+        int i = size << 1;
+        entries[i] = key;
+        entries[i + 1] = value;
+        size++;
+      } else {
+        ITransientMap t = PersistentHashMap.EMPTY.asTransient();
+        for (int i = 0; i < size << 1; i += 2) {
+          t = t.assoc(entries[i], entries[i + 1]);
+        }
+        t = t.assoc(key, value);
+        while (p.nextToken() != JsonToken.END_OBJECT) {
+          Object nextKey = _keyDeserializer.deserializeKey(p.getCurrentName(), ctxt);
+          p.nextToken();
+          Object nextValue = _valueDeserializer.deserialize(p, ctxt);
+          t = t.assoc(nextKey, nextValue);
+        }
+        return (Map<String, Object>) t.persistent();
+      }
     }
 
-    // t.persistent() returns a PersistentHashMap, which is a Map.
-    return (Map<String, Object>) t.persistent();
+    return (Map<String, Object>) PersistentArrayMap.createAsIfByAssoc(Arrays.copyOf(entries, size << 1));
   }
 }

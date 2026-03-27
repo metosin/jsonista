@@ -1,4 +1,7 @@
-# jsonista [![Continuous Integration status](https://github.com/metosin/jsonista/workflows/Run%20tests/badge.svg?event=push)](https://github.com/metosin/jsonista/actions) [![cljdoc badge](https://cljdoc.xyz/badge/metosin/jsonista)](https://cljdoc.xyz/d/metosin/jsonista/CURRENT)
+# jsonista
+
+[![Continuous Integration status](https://github.com/metosin/jsonista/actions/workflows/clojure.yml/badge.svg)](https://github.com/metosin/jsonista/actions/workflows/clojure.yml)
+[![cljdoc badge](https://cljdoc.org/badge/metosin/jsonista)](https://cljdoc.org/d/metosin/jsonista/CURRENT)
 
 > *jsonissa / jsonista / jsoniin, jsonilla / jsonilta / jsonille*
 
@@ -229,6 +232,6 @@ As [Miikka Koskinen, @miikka](https://github.com/miikka/), tells it on [his blog
 
 ## License
 
-Copyright &copy; 2016-2021 [Metosin Oy](http://www.metosin.fi).
+Copyright &copy; 2016-2026 [Metosin Oy](http://www.metosin.fi).
 
 Distributed under the Eclipse Public License 2.0.

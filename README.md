@@ -211,6 +211,14 @@ jsonista.jmh/decode-jackson    :decode  :throughput  5         29607.044    ops/
 jsonista.jmh/decode-jackson    :decode  :throughput  5         2539.491     ops/s  17.753        {:size "100k"}
 ```
 
+## Origin story
+
+As [Miikka Koskinen, @miikka](https://github.com/miikka/), tells it on [his blog](https://quanttype.net/p/speed-up-code-with-pi-autoresearch/#fn:1):
+
+> At that time, I was working at Metosin, a Clojure agency. Tommi Reiman ([@ikitommi](https://github.com/ikitommi)), one of the founders and a prolific open source developer, had an idea for how to make a fast JSON library. I thought Tommi’s idea was stupid and to show him that it won’t work, I started to implement a toy version.
+>
+> The idea wasn’t easy to implement and I figured I’d make something simpler first to have a baseline. The baseline was faster than Cheshire, the number one JSON library for Clojure, and we decided to ship it. Kalle Lehikoinen ([@kalekale](https://github.com/kalekale)) packaged it into jsonista. Tommi’s original idea never got implemented and I don’t even remember what it was anymore!
+
 ## Making a release
 
 - Update `CHANGELOG.md` and increment the version number in `project.clj`

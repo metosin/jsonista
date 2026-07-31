@@ -8,11 +8,11 @@
             [taoensso.nippy :as nippy]
             [jsonista.tagged :as jt]
             [clojure.edn :as edn])
-  (:import (com.fasterxml.jackson.databind ObjectMapper)
+  (:import (tools.jackson.databind.json JsonMapper)
            (java.util Map Date)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
            (clojure.lang Keyword PersistentHashSet)
-           (com.fasterxml.jackson.core JsonGenerator)))
+           (tools.jackson.core JsonGenerator)))
 
 (set! *warn-on-reflection* true)
 
@@ -67,7 +67,7 @@
 
   ;; 260ns
   (title "decode: jackson")
-  (let [mapper (ObjectMapper.)
+  (let [mapper ^JsonMapper (.build (JsonMapper/builder))
         decode (fn [] (.readValue mapper +json+ Map))]
     (assert (= +data+ (decode)))
     (cc/quick-bench (decode))))

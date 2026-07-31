@@ -1,3 +1,107 @@
+## 2.0.0
+
+jsonista now uses [Jackson 3](https://github.com/FasterXML/jackson-3) (`3.2.1`).
+
+**Breaking changes:**
+
+* **Requires Java 17+** (was Java 8+). Jackson 3 has a hard Java 17 baseline.
+* **Jackson coordinates changed** from `com.fasterxml.jackson.*` to
+  `tools.jackson.*`. If you pin Jackson versions in your own project, update
+  them.
+* **Trailing content after a JSON value is now an error.** Jackson 3 enables
+  `FAIL_ON_TRAILING_TOKENS` by default, so `(read-value "{} garbage")` throws
+  a `tools.jackson.core.exc.StreamReadException` instead of returning `{}`.
+  Measured directly, this check has no detectable performance cost.
+* **Jackson exceptions are now unchecked.** `IOException` and
+  `JsonProcessingException` are replaced by `JacksonException` and its
+  subtypes, all of which extend `RuntimeException`. Existing
+  `catch IOException` handlers around jsonista calls will no longer fire.
+* **`:factory` is JSON-only.** Jackson 3 requires format-specific mappers for
+  other formats; pass e.g. a `CBORMapper` via `:mapper` instead.
+* **Objects with no bean accessors now serialize as `{}` instead of
+  throwing.** Jackson 2 enabled `FAIL_ON_EMPTY_BEANS` by default, so
+  serializing a value jsonista has no serializer for and that exposes no
+  getters (an unsupported class, a `deftype` with no fields, etc.) raised
+  `InvalidDefinitionException`. Jackson 3's own default has this feature
+  disabled, and jsonista now takes that default as-is rather than
+  overriding it, so the same value silently serializes to `"{}"`.
+  `:do-not-fail-on-empty-beans` is unaffected but is now a no-op unless
+  something else (a custom `:mapper` or `:modules`) re-enabled the feature.
+* Enums now serialize using `toString` by default.
+* **`java.net.URL` is no longer accepted by `read-value`/`read-values`.**
+  Jackson 3 removed the `URL` overloads from `ObjectMapper.readValue` and
+  `ObjectReader.readValues`, and jsonista now follows suit instead of
+  routing around it. Passing a `URL` throws `IllegalArgumentException: No
+  implementation of method: :-read-value of protocol: #'jsonista.core/ReadValue
+  found for class: java.net.URL` (or the equivalent for `ReadValues`) — not a
+  Jackson exception, since dispatch fails in the Clojure protocol layer
+  before ever reaching Jackson.
+
+  `ReadValue`/`ReadValues` are public protocols — jsonista's documented
+  extension mechanism — so URL support is trivially restorable. Simplest,
+  since `InputStream` is already supported and this needs no Jackson
+  imports:
+
+  ```clojure
+  (with-open [in (.openStream url)] (j/read-value in))
+  (with-open [in (.openStream url)] (into [] (j/read-values in)))
+  ```
+
+  Or restore `URL` as a first-class type in your own code:
+
+  ```clojure
+  (extend-protocol j/ReadValue
+    java.net.URL
+    (-read-value [this mapper]
+      (with-open [in (.openStream ^java.net.URL this)]
+        (j/read-value in mapper))))
+  ```
+
+  **Caution:** `read-values` is lazy. Wrapping it in `with-open` without
+  realizing the sequence *inside* the `with-open` closes the underlying
+  stream before it's consumed — the stream is closed once control leaves
+  the block, regardless of whether anything has read from it yet. This
+  fails silently in some contexts (an empty sequence, no error) and throws
+  `Stream closed` in others, depending on how much buffering happened
+  before the close. That's why the example above wraps `read-values` in
+  `into []` inside the `with-open`, forcing full realization before the
+  stream closes — don't return the lazy iterator/seq out of the block.
+
+**Performance:**
+
+* **`java.util.Date` serialization no longer takes a lock.** `DateSerializer`
+  (behind the `:date-format` option) now formats through an immutable
+  `java.time.format.DateTimeFormatter` instead of a shared `SimpleDateFormat`
+  guarded by `synchronized`, removing the contention point when many threads
+  serialize dates through one mapper (3.3× throughput at 8 threads in a
+  contention microbenchmark). `:date-format` patterns are now interpreted by
+  `DateTimeFormatter.ofPattern`: common patterns — including the default
+  `yyyy-MM-dd'T'HH:mm:ss'Z'` — produce identical output, but a few pattern
+  letters (e.g. week-based `Y`) have subtly different semantics.
+
+**Other changes:**
+
+* `jackson-datatype-jsr310` is no longer a dependency — `java.time` support is
+  built into Jackson 3 databind.
+* **`jsonista.tagged/encode-collection` now writes elements through the live
+  generator.** Jackson 3 removed `JsonGenerator.getCodec()`, which the old
+  implementation used to serialize each collection element to a `String` and
+  emit it with `writeRawValue`. Elements now go through `writePOJO` directly,
+  which also avoids the intermediate `String`.
+
+  Output is byte-identical under Jackson's default pretty-printer (verified
+  against the pre-port implementation). A **custom `PrettyPrinter`** that
+  breaks arrays across lines may see a difference, and it is a fix rather
+  than a regression: the old path serialized nested elements in a separate
+  pass starting from indentation depth zero and then embedded that text
+  verbatim, so nested content could come out mis-indented relative to its
+  surroundings. Elements are now written at their true nesting depth.
+* **`:escape-non-ascii` is JSON-only.** `JsonWriteFeature/ESCAPE_NON_ASCII` is
+  JSON-format-specific in Jackson 3, unlike Jackson 2's format-agnostic
+  `JsonGenerator.Feature` equivalent. Combined with a non-JSON `:mapper`
+  (e.g. `CBORMapper`), `:escape-non-ascii` is now a documented no-op instead
+  of applying to the binary format as it did under Jackson 2.
+
 ## 1.0.0 (2026-03-06)
 
 * Jsonista has been fairly stable for a couple of years now. Let's call this 1.0!

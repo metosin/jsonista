@@ -67,19 +67,21 @@
     PersistentVectorDeserializer
     SymbolSerializer
     RatioSerializer FunctionalKeywordSerializer)
-   (com.fasterxml.jackson.core JsonGenerator$Feature JsonFactory)
-   (com.fasterxml.jackson.annotation JsonInclude$Include)
-   (com.fasterxml.jackson.databind
-    JsonSerializer ObjectMapper SequenceWriter
-    SerializationFeature DeserializationFeature Module)
-   (com.fasterxml.jackson.databind.module SimpleModule)
+   (tools.jackson.core StreamWriteFeature)
+   (tools.jackson.core.json JsonFactory JsonWriteFeature)
+   (com.fasterxml.jackson.annotation JsonInclude$Include JsonInclude$Value)
+   (tools.jackson.databind
+    ValueSerializer ObjectMapper SequenceWriter
+    SerializationFeature DeserializationFeature
+    JacksonModule)
+   (tools.jackson.databind.cfg DatatypeFeature DateTimeFeature MapperBuilder)
+   (tools.jackson.databind.json JsonMapper JsonMapper$Builder)
+   (tools.jackson.databind.module SimpleModule)
    (java.io InputStream Writer File OutputStream DataOutput Reader)
-   (java.net URL)
-   (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule)
    (java.util Iterator List Map Date)
    (clojure.lang Delay Keyword Ratio Symbol)))
 
-(defn- ^Module clojure-module
+(defn- ^JacksonModule clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
@@ -98,7 +100,7 @@
     (as-> module
           (doseq [[type encoder] encoders]
             (cond
-              (instance? JsonSerializer encoder) (.addSerializer module type encoder)
+              (instance? ValueSerializer encoder) (.addSerializer module type encoder)
               (fn? encoder) (.addSerializer module type (FunctionalSerializer. encoder))
               :else (throw (ex-info
                             (str "Can't register encoder " encoder " for type " type)
@@ -109,12 +111,27 @@
      (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
      (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
 
-(defn ^:no-doc ^Module java-collection-module
+(defn ^:no-doc ^JacksonModule java-collection-module
   "Create a Jackson Databind module to support Java HashMap and ArrayList."
   []
   (doto (SimpleModule. "JavaCollectionModule")
     (.addDeserializer List (ArrayListDeserializer.))
     (.addDeserializer Map (HashMapDeserializer.))))
+
+(defn- ^MapperBuilder maybe-enable-escape-non-ascii
+  "`JsonWriteFeature/ESCAPE_NON_ASCII` is JSON-specific in Jackson 3 - it's only
+  declared on `JsonMapper$Builder`, not on the generic `MapperBuilder` every
+  format-specific builder (`CBORMapper$Builder`, etc.) actually extends.
+  Enabling it there unconditionally throws `IllegalArgumentException` for a
+  non-JSON `:mapper`. Only enable it when the builder is JSON-capable; no-op
+  otherwise, rather than throwing or silently swallowing an exception."
+  [^MapperBuilder builder]
+  (if (instance? JsonMapper$Builder builder)
+    (let [^JsonMapper$Builder json-builder builder]
+      (.enable json-builder
+               ^"[Ltools.jackson.core.json.JsonWriteFeature;"
+               (into-array JsonWriteFeature [JsonWriteFeature/ESCAPE_NON_ASCII])))
+    builder))
 
 (defn ^ObjectMapper object-mapper
   "Create an ObjectMapper with Clojure support.
@@ -125,17 +142,17 @@
   | Mapper options      |                                                            |
   | ------------------- | ---------------------------------------------------------- |
   | `:modules`          | vector of extra ObjectMapper modules                       |
-  | `:factory`          | A Jackson JsonFactory for this given mapper                |
+  | `:factory`          | A Jackson JsonFactory. JSON only — for other formats (CBOR, Smile, YAML) pass a format-specific mapper via `:mapper` |
   | `:mapper`           | The base ObjectMapper to start with - overrides `:factory` |
 
   | Encoding options              |                                                                                                                                   |
   |-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
   | `:order-by-keys`              | set to true to order map keys alphabetically                                                                                      |
   | `:pretty`                     | set to true use Jacksons pretty-printing defaults                                                                                 |
-  | `:escape-non-ascii`           | set to true to escape non ascii characters                                                                                        |
+  | `:escape-non-ascii`           | set to true to escape non ascii characters. JSON only - no-op if `:mapper` is a non-JSON (e.g. CBOR, Smile) mapper                |
   | `:strip-nils`                 | remove any keys that have nil values                                                                                              |
   | `:strip-empties`              | remove any keys that have nil or empty (\"\", {}, [], etc) values                                                                 |
-  | `:do-not-fail-on-empty-beans` | serialize objects with no accessors as empty objects instead of throwing an exception                                             |
+  | `:do-not-fail-on-empty-beans` | serialize objects with no accessors as empty objects instead of throwing an exception. Jackson 3's own default already does this (unlike Jackson 2's), so this is a no-op unless something else (e.g. a custom `:mapper` or `:modules`) re-enabled `FAIL_ON_EMPTY_BEANS` |
   | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
   | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`                   | a map of custom encoders where keys should be types and values should be encoder functions                                        |
@@ -153,26 +170,50 @@
   ([options]
    (let [factory (:factory options)
          maybe-mapper (:mapper options)
-         base-mapper (cond
-                       maybe-mapper maybe-mapper
-                       factory (ObjectMapper. ^JsonFactory factory)
-                       :else (ObjectMapper.))
-         mapper (doto ^ObjectMapper base-mapper
-                  (.registerModule (JavaTimeModule.))
-                  (.registerModule (clojure-module options))
-                  (cond->
-                   (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
-                   (:pretty options) (.enable SerializationFeature/INDENT_OUTPUT)
-                   (:bigdecimals options) (.enable DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS)
-                   (:strip-nils options) (.setSerializationInclusion JsonInclude$Include/NON_NULL)
-                   (:strip-empties options) (.setSerializationInclusion JsonInclude$Include/NON_EMPTY)
-                   (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
-                   (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))
-                   (contains? options :close) (.configure JsonGenerator$Feature/AUTO_CLOSE_TARGET (boolean (:close options)))))]
-     (doseq [module (:modules options)]
-       (.registerModule mapper module))
-     (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)
-     mapper)))
+         builder (cond
+                   maybe-mapper (.rebuild ^ObjectMapper maybe-mapper)
+                   factory (JsonMapper/builder ^JsonFactory factory)
+                   :else (JsonMapper/builder))
+         builder (-> ^MapperBuilder builder
+                     (.addModule (clojure-module options))
+                     (.disable ^"[Ltools.jackson.databind.cfg.DatatypeFeature;"
+                               (into-array DatatypeFeature [DateTimeFeature/WRITE_DATES_AS_TIMESTAMPS]))
+                     (cond->
+                      (:order-by-keys options)
+                      (.enable ^"[Ltools.jackson.databind.SerializationFeature;"
+                               (into-array SerializationFeature [SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS]))
+
+                      (:pretty options)
+                      (.enable ^"[Ltools.jackson.databind.SerializationFeature;"
+                               (into-array SerializationFeature [SerializationFeature/INDENT_OUTPUT]))
+
+                      (:bigdecimals options)
+                      (.enable ^"[Ltools.jackson.databind.DeserializationFeature;"
+                               (into-array DeserializationFeature [DeserializationFeature/USE_BIG_DECIMAL_FOR_FLOATS]))
+
+                      (:strip-nils options)
+                      (.changeDefaultPropertyInclusion
+                       (reify java.util.function.UnaryOperator
+                         (apply [_ _incl]
+                           (JsonInclude$Value/construct JsonInclude$Include/NON_NULL JsonInclude$Include/NON_NULL))))
+
+                      (:strip-empties options)
+                      (.changeDefaultPropertyInclusion
+                       (reify java.util.function.UnaryOperator
+                         (apply [_ _incl]
+                           (JsonInclude$Value/construct JsonInclude$Include/NON_EMPTY JsonInclude$Include/NON_EMPTY))))
+
+                      (:do-not-fail-on-empty-beans options)
+                      (.disable ^"[Ltools.jackson.databind.SerializationFeature;"
+                                (into-array SerializationFeature [SerializationFeature/FAIL_ON_EMPTY_BEANS]))
+
+                      (:escape-non-ascii options)
+                      (maybe-enable-escape-non-ascii)
+
+                      (contains? options :close)
+                      (.configure StreamWriteFeature/AUTO_CLOSE_TARGET (boolean (:close options)))))
+         builder (reduce (fn [^MapperBuilder b module] (.addModule b module)) builder (:modules options))]
+     (.build ^MapperBuilder builder))))
 
 (def ^:deprecated ^ObjectMapper +default-mapper+
   "DEPRECATED: The default ObjectMapper instance."
@@ -206,10 +247,6 @@
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object))
 
-  URL
-  (-read-value [this ^ObjectMapper mapper]
-    (.readValue mapper this ^Class Object))
-
   String
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper this ^Class Object))
@@ -235,10 +272,6 @@
   (-read-values [_ _])
 
   File
-  (-read-values [this ^ObjectMapper mapper]
-    (.readValues (.readerFor mapper ^Class Object) this))
-
-  URL
   (-read-values [this ^ObjectMapper mapper]
     (.readValues (.readerFor mapper ^Class Object) this))
 
@@ -336,15 +369,13 @@
 (defn read-value
   "Decodes a value from a JSON from anything that
   satisfies [[ReadValue]] protocol. By default,
-  File, URL, String, Reader and InputStream are supported.
+  File, String, Reader and InputStream are supported.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options.
 
-  Throws the same exceptions as ObjectMapper.readValue():
-    IOException,
-    com.fasterxml.jackson.core.exc.StreamReadException,
-    com.fasterxml.jackson.databind.DatabindException"
+  Throws tools.jackson.databind.DatabindException or
+  tools.jackson.core.exc.StreamReadException (both unchecked)."
   ([object]
    (-read-value object default-object-mapper))
   ([object ^ObjectMapper mapper]
@@ -355,8 +386,8 @@
 
   To configure, pass in an ObjectMapper created with [[object-mapper]].
 
-  Throws the same exceptions as ObjectMapper.writeValueAsString():
-    com.fasterxml.jackson.core.JsonProcessingException"
+  Throws tools.jackson.databind.DatabindException or
+  tools.jackson.core.exc.StreamWriteException (both unchecked)."
   ([object]
    (.writeValueAsString default-object-mapper object))
   ([object ^ObjectMapper mapper]
@@ -367,8 +398,8 @@
 
   To configure, pass in an ObjectMapper created with [[object-mapper]].
 
-  Throws the same exceptions as ObjectMapper.writeValueAsBytes():
-    com.fasterxml.jackson.core.JsonProcessingException"
+  Throws tools.jackson.databind.DatabindException or
+  tools.jackson.core.exc.StreamWriteException (both unchecked)."
   {:tag 'bytes}
   ([object]
    (.writeValueAsBytes default-object-mapper object))
@@ -382,10 +413,8 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options.
 
-  Throws the same exceptions as ObjectMapper.writeValue():
-    IOException,
-    com.fasterxml.jackson.core.exc.StreamWriteException,
-    com.fasterxml.jackson.databind.DatabindException"
+  Throws tools.jackson.databind.DatabindException or
+  tools.jackson.core.exc.StreamWriteException (both unchecked)."
   ([to object]
    (-write-value to object default-object-mapper))
   ([to object ^ObjectMapper mapper]
@@ -415,7 +444,7 @@
 (defn read-values
   "Decodes a sequence of values from a JSON as an iterator
   from anything that satisfies [[ReadValue]] protocol.
-  By default, File, URL, String, Reader and InputStream are supported.
+  By default, File, String, Reader and InputStream are supported.
 
   The returned object is an Iterable, Iterator and IReduceInit.
   It can be reduced on via [[reduce]] and turned into a lazy sequence
@@ -424,7 +453,7 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options.
 
-  Throws IOException."
+  Throws tools.jackson.core.JacksonException (unchecked)."
   ([object]
    (wrap-values (-read-values object default-object-mapper)))
   ([object ^ObjectMapper mapper]
@@ -439,7 +468,7 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options.
 
-  Throws IOException."
+  Throws tools.jackson.core.JacksonException (unchecked)."
   ([to values]
    (-write-values to values default-object-mapper))
   ([to values ^ObjectMapper mapper]
@@ -454,7 +483,7 @@
   To configure, pass in an ObjectMapper created with [[object-mapper]],
   see [[object-mapper]] docstring for the available options.
 
-  Throws IOException."
+  Throws tools.jackson.core.JacksonException (unchecked)."
   ([to values]
    (-write-values-as-array to values default-object-mapper))
   ([to values ^ObjectMapper mapper]

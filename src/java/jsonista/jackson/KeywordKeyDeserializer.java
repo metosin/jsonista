@@ -1,16 +1,13 @@
 package jsonista.jackson;
 
 import clojure.lang.Keyword;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-
-import java.io.IOException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.KeyDeserializer;
 
 public class KeywordKeyDeserializer extends KeyDeserializer {
 
   @Override
-  public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public Object deserializeKey(String key, DeserializationContext ctxt) {
     return Keyword.intern(key);
   }
 }

@@ -1,11 +1,9 @@
 package jsonista.jackson;
 
 import clojure.lang.Ratio;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 public class RatioSerializer extends StdSerializer<Ratio> {
 
@@ -14,7 +12,7 @@ public class RatioSerializer extends StdSerializer<Ratio> {
   }
 
   @Override
-  public void serialize(Ratio value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Ratio value, JsonGenerator gen, SerializationContext provider) {
     gen.writeNumber(value.doubleValue());
   }
 }

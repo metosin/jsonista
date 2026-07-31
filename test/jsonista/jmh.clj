@@ -3,7 +3,7 @@
             [cheshire.core :as cheshire]
             [clojure.data.json :as json]
             [jsonista.tagged :as jt])
-  (:import (com.fasterxml.jackson.databind ObjectMapper)
+  (:import (tools.jackson.databind.json JsonMapper)
            (clojure.lang Keyword)))
 
 (set! *warn-on-reflection* true)
@@ -39,7 +39,7 @@
   (defn encode-jsonista-fast [x] (.writeValueAsString mapper x))
   (defn decode-jsonista-fast [x] (.readValue mapper ^String x ^Class Object)))
 
-(let [mapper (ObjectMapper.)]
+(let [mapper ^JsonMapper (.build (JsonMapper/builder))]
   (defn encode-jackson [x] (.writeValueAsString mapper x))
   (defn decode-jackson [x] (.readValue mapper ^String x ^Class Object)))
 

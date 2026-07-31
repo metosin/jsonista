@@ -1,10 +1,8 @@
 package jsonista.jackson;
 
 import clojure.lang.IFn;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.KeyDeserializer;
-
-import java.io.IOException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.KeyDeserializer;
 
 public class FunctionalKeyDeserializer extends KeyDeserializer {
   private final IFn encoder;
@@ -14,7 +12,7 @@ public class FunctionalKeyDeserializer extends KeyDeserializer {
   }
 
   @Override
-  public Object deserializeKey(String key, DeserializationContext ctxt) throws IOException {
+  public Object deserializeKey(String key, DeserializationContext ctxt) {
     return encoder.invoke(key);
   }
 }

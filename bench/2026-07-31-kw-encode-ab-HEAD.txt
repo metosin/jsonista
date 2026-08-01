@@ -1,0 +1,18 @@
+
+:benchmark                             :name             :mode        :samples  :score              :score-error  :params       
+-------------------------------------  ----------------  -----------  --------  ------------------  ------------  --------------
+jsonista.jmh/encode-cheshire-kw        :encode-kw        :throughput  5         2586177.691  ops/s  20793.186     {:size "10b"} 
+jsonista.jmh/encode-cheshire-kw        :encode-kw        :throughput  5         1569705.469  ops/s  252873.699    {:size "100b"}
+jsonista.jmh/encode-cheshire-kw        :encode-kw        :throughput  5         456630.241   ops/s  5477.623      {:size "1k"}  
+jsonista.jmh/encode-cheshire-kw        :encode-kw        :throughput  5         39726.685    ops/s  378.344       {:size "10k"} 
+jsonista.jmh/encode-cheshire-kw        :encode-kw        :throughput  5         4301.306     ops/s  27.080        {:size "100k"}
+jsonista.jmh/encode-jsonista-kw        :encode-kw        :throughput  5         8690787.965  ops/s  195517.235    {:size "10b"} 
+jsonista.jmh/encode-jsonista-kw        :encode-kw        :throughput  5         3282187.160  ops/s  15306.878     {:size "100b"}
+jsonista.jmh/encode-jsonista-kw        :encode-kw        :throughput  5         661133.941   ops/s  10974.064     {:size "1k"}  
+jsonista.jmh/encode-jsonista-kw        :encode-kw        :throughput  5         52920.122    ops/s  634.467       {:size "10k"} 
+jsonista.jmh/encode-jsonista-kw        :encode-kw        :throughput  5         5123.842     ops/s  18.812        {:size "100k"}
+jsonista.jmh/encode-jsonista-kw-bytes  :encode-kw-bytes  :throughput  5         8762356.784  ops/s  39966.862     {:size "10b"} 
+jsonista.jmh/encode-jsonista-kw-bytes  :encode-kw-bytes  :throughput  5         3060667.404  ops/s  27338.808     {:size "100b"}
+jsonista.jmh/encode-jsonista-kw-bytes  :encode-kw-bytes  :throughput  5         636695.325   ops/s  10579.969     {:size "1k"}  
+jsonista.jmh/encode-jsonista-kw-bytes  :encode-kw-bytes  :throughput  5         62518.469    ops/s  462.644       {:size "10k"} 
+jsonista.jmh/encode-jsonista-kw-bytes  :encode-kw-bytes  :throughput  5         6134.829     ops/s  8.784         {:size "100k"}

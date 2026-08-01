@@ -145,6 +145,7 @@ See [docs/streaming.md](docs/streaming.md).
 ## Performance
 
 * All standard encoders and decoders are written in Java
+* Untyped decoding builds Clojure data structures directly, in a single pass
 * Protocol dispatch with `read-value` & `write-value`
 * Jackson `ObjectMapper` is used directly
 * Small functions to support JVM Inlining
@@ -152,8 +153,13 @@ See [docs/streaming.md](docs/streaming.md).
 Measured using [lein-jmh](https://github.com/jgpc42/lein-jmh),
 see [perf-tests](/test/jsonista/jmh.clj) for details.
 
-The Jackson 2 -> Jackson 3 port (`2.0.0`) measured as performance-neutral at
-payload sizes of 100 bytes and up.
+Compared to jsonista `1.0.0` (Jackson 2), `2.0.0` (Jackson 3 plus decoder
+optimizations) decodes 15-23% faster with string keys and 28-48% faster with
+keyword keys at payloads of 100 bytes and up; encoding is unchanged at 1 KB
+and up. Payloads under ~100 bytes encode slower than under Jackson 2 - the
+regression is present in the raw Jackson 3 engine itself and is not jsonista
+overhead. Method, controls and full data:
+[bench/2026-08-01-full-comparison.md](/bench/2026-08-01-full-comparison.md).
 
 ### Throughput, relative
 
@@ -167,14 +173,50 @@ payload sizes of 100 bytes and up.
 
 ![decode](/docs/json-decode-t.png)
 
-The four graphs above are from the Jackson 2 era and have not been
-regenerated for Jackson 3.
+The graphs are generated from the Jackson 3 benchmark run
+(`bench/2026-08-01-full-jackson321.txt`).
 
 ### Throughput, data
 
-The table that used to live here was captured on Jackson 2 and is stale for
-this version. Regenerating it (`lein jmh '{:file "benchmarks.edn", :type
-:quick, :format :table}'`, ~67 minutes) is tracked as a follow-up.
+Captured 2026-08-01 on Jackson 3.2.1, Apple Silicon MacBook Pro, OpenJDK
+25.0.2 (Corretto): 1 fork, 3×3 s warmup + 5×3 s measurement per point (error
+bars ≤3% for most cells). All numbers are ops/s, higher is better.
+
+**encode** (string-keyed maps):
+
+|               | 10b | 100b | 1k | 10k | 100k |
+|---------------|----:|-----:|---:|----:|-----:|
+| data.json     | 5,917,892 | 1,421,856 | 210,328 | 16,047 | 1,647 |
+| cheshire      | 2,519,476 | 1,541,245 | 471,888 | 44,068 | 4,253 |
+| jsonista      | 9,287,998 | 3,481,862 | 716,087 | 57,715 | 5,528 |
+| Jackson (raw) | 9,376,698 | 3,523,568 | 655,584 | 55,877 | 5,534 |
+
+**decode** (string keys):
+
+|               | 10b | 100b | 1k | 10k | 100k |
+|---------------|----:|-----:|---:|----:|-----:|
+| data.json     | 8,481,497 | 2,108,504 | 346,346 | 27,968 | 2,602 |
+| cheshire      | 2,189,307 | 1,260,362 | 307,258 | 27,377 | 3,006 |
+| jsonista      | 9,031,389 | 2,411,301 | 420,738 | 37,290 | 3,759 |
+| Jackson (raw) | 8,448,628 | 2,406,312 | 441,294 | 40,911 | 4,254 |
+
+**encode, keyword keys** (`keyword-keys-object-mapper`; data.json writes
+keyword keys natively, cheshire likewise):
+
+|           | 10b | 100b | 1k | 10k | 100k |
+|-----------|----:|-----:|---:|----:|-----:|
+| data.json | 7,047,371 | 1,394,450 | 216,929 | 16,633 | 1,619 |
+| cheshire  | 2,156,053 | 1,489,408 | 415,399 | 39,578 | 4,270 |
+| jsonista  | 8,852,407 | 3,388,647 | 666,115 | 56,608 | 5,357 |
+
+**decode, keyword keys** (data.json with `:key-fn keyword`, cheshire with
+`(parse-string s true)`):
+
+|           | 10b | 100b | 1k | 10k | 100k |
+|-----------|----:|-----:|---:|----:|-----:|
+| data.json | 7,449,560 | 1,757,660 | 325,437 | 27,528 | 2,688 |
+| cheshire  | 2,106,946 | 1,102,503 | 268,505 | 24,393 | 2,570 |
+| jsonista  | 8,814,925 | 2,520,516 | 443,022 | 39,829 | 3,964 |
 
 ## Origin story
 

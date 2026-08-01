@@ -458,6 +458,62 @@
     (is (= "{\"realized\":true}" (j/write-value-as-string d)))
     (is (= "{\"realized\":true}" (j/write-value-as-string d2)))))
 
+(deftest keyword-encoding-test
+  (testing "repeated writes produce identical output (SerializedString cache)"
+    (let [data {:foo 1 :bar/baz :some/value}]
+      (is (= "{\"foo\":1,\"bar/baz\":\"some/value\"}" (j/write-value-as-string data)))
+      (is (= "{\"foo\":1,\"bar/baz\":\"some/value\"}" (j/write-value-as-string data)))))
+  (testing "keyword keys and values needing standard JSON escaping"
+    (let [k (keyword "quote\"and\\slash")]
+      ;; the value comes back as a plain string - keyword values don't
+      ;; roundtrip through JSON - but both must be escaped correctly
+      (is (= {k "quote\"and\\slash"}
+             (-> {k k} j/write-value-as-string (j/read-value j/keyword-keys-object-mapper))))))
+  (testing ":escape-non-ascii applies to keyword keys and values"
+    ;; pins that the SerializedString fast path is bypassed when the
+    ;; generator's escaping config isn't the JSON default
+    (let [mapper (j/object-mapper {:escape-non-ascii true})]
+      (is (= "{\"p\\u00E4\\u00E4\":\"\\u00F6\\u00F6\"}"
+             (j/write-value-as-string {:pää :öö} mapper)))
+      ;; same mapper family without the option keeps raw UTF-8
+      (is (= "{\"pää\":\"öö\"}" (j/write-value-as-string {:pää :öö}))))))
+
+(deftest map-decoding-test
+  (testing "small objects decode to array maps, like Clojure map literals"
+    (is (instance? clojure.lang.PersistentArrayMap (j/read-value "{}")))
+    (is (instance? clojure.lang.PersistentArrayMap (j/read-value "{\"a\":1}")))
+    (is (instance? clojure.lang.PersistentArrayMap
+                   (j/read-value (j/write-value-as-string (zipmap (range 8) (range 8)))))))
+  (testing "large objects decode to hash maps"
+    (is (instance? clojure.lang.PersistentHashMap
+                   (j/read-value (j/write-value-as-string (zipmap (range 9) (range 9)))))))
+  (testing "roundtrip across the array-map/hash-map boundary"
+    (doseq [n [0 1 7 8 9 16 17 100]]
+      (let [data (into {} (map (fn [i] [(keyword (str "k" i)) i])) (range n))]
+        (is (= data (-> data j/write-value-as-string (j/read-value j/keyword-keys-object-mapper)))
+            (str n " keys")))))
+  (testing "duplicate keys keep the last value (assoc semantics)"
+    (is (= {:a 2} (j/read-value "{\"a\":1,\"a\":2}" j/keyword-keys-object-mapper)))
+    ;; duplicate whose first occurrence is in the array-map buffer and whose
+    ;; second lands after the spill into the transient hash map
+    (let [json (str "{" (str/join "," (map #(str "\"k" % "\":" %) (range 9))) ",\"k0\":99}")]
+      (is (= (-> (zipmap (map #(keyword (str "k" %)) (range 9)) (range 9))
+                 (assoc :k0 99))
+             (j/read-value json j/keyword-keys-object-mapper))))))
+
+(deftest keyword-key-decoding-test
+  (testing "repeated keys decode to the identical interned keyword"
+    ;; holds via Keyword.intern alone, but pins the KeywordKeyDeserializer
+    ;; cache to interning semantics
+    (let [a (j/read-value "{\"foo\":1}" j/keyword-keys-object-mapper)
+          b (j/read-value "{\"foo\":2}" j/keyword-keys-object-mapper)]
+      (is (identical? (-> a keys first) (-> b keys first)))))
+  (testing "slashes intern as namespaced keywords"
+    (is (= {:a/b 1} (j/read-value "{\"a/b\":1}" j/keyword-keys-object-mapper))))
+  (testing "many distinct keys (cache overflow) still decode correctly"
+    (let [data (into {} (map (fn [i] [(keyword (str "key" i)) i])) (range 3000))]
+      (is (= data (-> data j/write-value-as-string (j/read-value j/keyword-keys-object-mapper)))))))
+
 ;; Characterization test: pins a behavior change inherited from Jackson 3's
 ;; defaults (FAIL_ON_TRAILING_TOKENS is now enabled), rather than driving new
 ;; code. It is expected to pass immediately.

@@ -69,6 +69,24 @@ jsonista now uses [Jackson 3](https://github.com/FasterXML/jackson-3) (`3.2.1`).
 
 **Performance:**
 
+* **Decoding is 15-23% faster with string keys and 28-48% faster with keyword
+  keys than 1.0.0** (measured across 100 B - 100 KB payloads with
+  cheshire/data.json as cross-run controls, see
+  `bench/2026-08-01-full-comparison.md`): repeated object keys hit a bounded
+  keyword cache instead of `Keyword.intern` (same clear-when-full bounding
+  strategy jackson-core uses internally for property-name interning in
+  `tools.jackson.core.util.InternCache`), JSON objects of 8 entries or
+  fewer build `PersistentArrayMap`s directly, and untyped decoding walks the
+  token stream in a single pass (`ClojureUntypedDeserializer`) instead of
+  double-dispatching through databind's `UntypedObjectDeserializer`.
+* **JSON objects with 8 or fewer entries now decode to `PersistentArrayMap`**
+  (insertion-ordered, matching small Clojure map literals and cheshire)
+  instead of `PersistentHashMap`. Equality semantics are unchanged; only code
+  inspecting the concrete map class or relying on `PersistentHashMap` seq
+  order would notice.
+* Encoding throughput is unchanged at payloads of 1 KB and up. Payloads under
+  ~100 bytes encode slower than under Jackson 2; the regression is measurable
+  in the raw Jackson 3 engine with no jsonista code in the loop.
 * **`java.util.Date` serialization no longer takes a lock.** `DateSerializer`
   (behind the `:date-format` option) now formats through an immutable
   `java.time.format.DateTimeFormatter` instead of a shared `SimpleDateFormat`

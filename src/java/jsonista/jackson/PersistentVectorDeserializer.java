@@ -34,11 +34,19 @@ public class PersistentVectorDeserializer extends StdDeserializer<List<Object>> 
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<Object> deserialize(JsonParser p, DeserializationContext ctxt) {
+    return deserializeVector(p, ctxt, _valueDeserializer);
+  }
+
+  /**
+   * Builds a PersistentVector from an array whose START_ARRAY is the current
+   * token. Shared with {@link ClojureUntypedDeserializer}'s inlined path.
+   */
+  @SuppressWarnings("unchecked")
+  static List<Object> deserializeVector(JsonParser p, DeserializationContext ctxt, ValueDeserializer<?> valueDeserializer) {
     ITransientCollection t = PersistentVector.EMPTY.asTransient();
     while (p.nextValue() != JsonToken.END_ARRAY) {
-      t = t.conj(_valueDeserializer.deserialize(p, ctxt));
+      t = t.conj(valueDeserializer.deserialize(p, ctxt));
     }
     return (List<Object>) t.persistent();
   }

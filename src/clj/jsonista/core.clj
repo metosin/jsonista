@@ -55,6 +55,7 @@
   and has been used in production much more."
   (:import
    (jsonista.jackson
+    ClojureUntypedDeserializer
     DateSerializer
     DelaySerializer
     FunctionalKeyDeserializer
@@ -88,6 +89,7 @@
   [{:keys [encode-key-fn decode-key-fn encoders date-format]
     :or {encode-key-fn true, decode-key-fn false}}]
   (doto (SimpleModule. "Clojure")
+    (.addDeserializer Object (ClojureUntypedDeserializer.))
     (.addDeserializer List (PersistentVectorDeserializer.))
     (.addDeserializer Map (PersistentHashMapDeserializer.))
     (.addSerializer Keyword (KeywordSerializer. false))

@@ -1,21 +1,21 @@
 package jsonista.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.SimpleTimeZone;
 
 public class DateSerializer extends StdSerializer<Date> {
-  private final SimpleDateFormat formatter;
+  // DateTimeFormatter is immutable, so serialization needs no synchronization.
+  private final DateTimeFormatter formatter;
 
   public DateSerializer(String dateFormat) {
     super(DateSerializer.class, true);
-    formatter = new SimpleDateFormat(dateFormat);
-    formatter.setTimeZone(new SimpleTimeZone(0, "UTC"));
+    formatter = DateTimeFormatter.ofPattern(dateFormat).withZone(ZoneOffset.UTC);
   }
 
   public DateSerializer() {
@@ -23,11 +23,8 @@ public class DateSerializer extends StdSerializer<Date> {
   }
 
   @Override
-  public void serialize(Date value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-    // TODO: use something like jackson-datatype-jsr310?
-    // SimpleDateFormat is not thread-safe, so we must synchronize it.
-    synchronized (formatter) {
-      gen.writeString(formatter.format(value));
-    }
+  public void serialize(Date value, JsonGenerator gen, SerializationContext provider) {
+    // Not value.toInstant(): java.sql.Date overrides it to throw.
+    gen.writeString(formatter.format(Instant.ofEpochMilli(value.getTime())));
   }
 }

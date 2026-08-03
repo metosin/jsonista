@@ -1,0 +1,13 @@
+
+:benchmark                       :name       :mode        :samples  :score              :score-error  :params       
+-------------------------------  ----------  -----------  --------  ------------------  ------------  --------------
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         2067408.060  ops/s  29831.885     {:size "10b"} 
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         1081483.229  ops/s  16306.301     {:size "100b"}
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         264709.208   ops/s  5396.158      {:size "1k"}  
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         24040.593    ops/s  662.448       {:size "10k"} 
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         2468.931     ops/s  197.600       {:size "100k"}
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         7336229.541  ops/s  133726.090    {:size "10b"} 
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         1734666.199  ops/s  28434.627     {:size "100b"}
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         346686.440   ops/s  5603.659      {:size "1k"}  
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         33368.530    ops/s  403.585       {:size "10k"} 
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         3335.364     ops/s  86.945        {:size "100k"}

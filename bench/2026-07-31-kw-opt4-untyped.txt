@@ -1,0 +1,33 @@
+
+:benchmark                       :name       :mode        :samples  :score              :score-error  :params       
+-------------------------------  ----------  -----------  --------  ------------------  ------------  --------------
+jsonista.jmh/decode-data-json    :decode     :throughput  5         9760621.156  ops/s  129202.363    {:size "10b"} 
+jsonista.jmh/decode-data-json    :decode     :throughput  5         2063905.195  ops/s  84854.935     {:size "100b"}
+jsonista.jmh/decode-data-json    :decode     :throughput  5         337652.237   ops/s  32041.486     {:size "1k"}  
+jsonista.jmh/decode-data-json    :decode     :throughput  5         26070.120    ops/s  807.352       {:size "10k"} 
+jsonista.jmh/decode-data-json    :decode     :throughput  5         2341.815     ops/s  161.503       {:size "100k"}
+jsonista.jmh/decode-cheshire     :decode     :throughput  5         2067051.394  ops/s  213487.578    {:size "10b"} 
+jsonista.jmh/decode-cheshire     :decode     :throughput  5         1248086.113  ops/s  41582.362     {:size "100b"}
+jsonista.jmh/decode-cheshire     :decode     :throughput  5         297289.035   ops/s  8227.672      {:size "1k"}  
+jsonista.jmh/decode-cheshire     :decode     :throughput  5         27714.941    ops/s  2670.485      {:size "10k"} 
+jsonista.jmh/decode-cheshire     :decode     :throughput  5         2922.882     ops/s  198.694       {:size "100k"}
+jsonista.jmh/decode-jsonista     :decode     :throughput  5         8079720.754  ops/s  1896860.512   {:size "10b"} 
+jsonista.jmh/decode-jsonista     :decode     :throughput  5         2111514.334  ops/s  295929.173    {:size "100b"}
+jsonista.jmh/decode-jsonista     :decode     :throughput  5         393833.350   ops/s  81620.026     {:size "1k"}  
+jsonista.jmh/decode-jsonista     :decode     :throughput  5         36506.427    ops/s  3556.142      {:size "10k"} 
+jsonista.jmh/decode-jsonista     :decode     :throughput  5         3702.658     ops/s  71.885        {:size "100k"}
+jsonista.jmh/decode-jackson      :decode     :throughput  5         8615506.976  ops/s  219937.286    {:size "10b"} 
+jsonista.jmh/decode-jackson      :decode     :throughput  5         2429296.262  ops/s  25740.047     {:size "100b"}
+jsonista.jmh/decode-jackson      :decode     :throughput  5         434611.228   ops/s  8779.603      {:size "1k"}  
+jsonista.jmh/decode-jackson      :decode     :throughput  5         40092.540    ops/s  1059.063      {:size "10k"} 
+jsonista.jmh/decode-jackson      :decode     :throughput  5         4143.210     ops/s  55.703        {:size "100k"}
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         1972390.953  ops/s  56463.264     {:size "10b"} 
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         1043561.877  ops/s  6947.932      {:size "100b"}
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         257317.808   ops/s  7962.708      {:size "1k"}  
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         23480.664    ops/s  844.053       {:size "10k"} 
+jsonista.jmh/decode-cheshire-kw  :decode-kw  :throughput  5         2508.456     ops/s  35.748        {:size "100k"}
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         8570484.253  ops/s  215966.105    {:size "10b"} 
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         2421712.659  ops/s  17666.440     {:size "100b"}
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         422784.053   ops/s  5166.531      {:size "1k"}  
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         38354.524    ops/s  787.939       {:size "10k"} 
+jsonista.jmh/decode-jsonista-kw  :decode-kw  :throughput  5         3736.280     ops/s  32.118        {:size "100k"}

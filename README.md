@@ -26,7 +26,7 @@ Blogged:
 
 [![Clojars Project](http://clojars.org/metosin/jsonista/latest-version.svg)](http://clojars.org/metosin/jsonista)
 
-Requires Java1.8+
+Requires Java 17+
 
 ## Quickstart
 
@@ -98,8 +98,8 @@ Reading & writing directly into a file:
 Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [clj-time](https://github.com/clj-time/clj-time).
 
 ```clj
-;; [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.9.5"]
-(import '[com.fasterxml.jackson.datatype.joda JodaModule])
+;; [tools.jackson.datatype/jackson-datatype-joda "3.2.1"]
+(import '[tools.jackson.datatype.joda JodaModule])
 (import '[org.joda.time LocalDate])
 
 (def mapper
@@ -145,12 +145,21 @@ See [docs/streaming.md](docs/streaming.md).
 ## Performance
 
 * All standard encoders and decoders are written in Java
+* Untyped decoding builds Clojure data structures directly, in a single pass
 * Protocol dispatch with `read-value` & `write-value`
 * Jackson `ObjectMapper` is used directly
 * Small functions to support JVM Inlining
 
 Measured using [lein-jmh](https://github.com/jgpc42/lein-jmh),
 see [perf-tests](/test/jsonista/jmh.clj) for details.
+
+Compared to jsonista `1.0.0` (Jackson 2), `2.0.0` (Jackson 3 plus decoder
+optimizations) decodes 15-23% faster with string keys and 28-48% faster with
+keyword keys at payloads of 100 bytes and up; encoding is unchanged at 1 KB
+and up. Payloads under ~100 bytes encode slower than under Jackson 2 - the
+regression is present in the raw Jackson 3 engine itself and is not jsonista
+overhead. Method, controls and full data:
+[bench/2026-08-01-full-comparison.md](/bench/2026-08-01-full-comparison.md).
 
 ### Throughput, relative
 
@@ -164,55 +173,50 @@ see [perf-tests](/test/jsonista/jmh.clj) for details.
 
 ![decode](/docs/json-decode-t.png)
 
+The graphs are generated from the Jackson 3 benchmark run
+(`bench/2026-08-01-full-jackson321.txt`).
+
 ### Throughput, data
 
-```bash
-➜  jsonista git:(master) ✗ lein jmh '{:file "benchmarks.edn", :type :quick, :format :table}'
-{:% 100.0 :eta "00:00:00"}
+Captured 2026-08-01 on Jackson 3.2.1, Apple Silicon MacBook Pro, OpenJDK
+25.0.2 (Corretto): 1 fork, 3×3 s warmup + 5×3 s measurement per point (error
+bars ≤3% for most cells). All numbers are ops/s, higher is better.
 
-:benchmark                     :name    :mode        :samples  :score              :score-error  :params
------------------------------  -------  -----------  --------  ------------------  ------------  --------------
-jsonista.jmh/encode-data-json  :encode  :throughput  5         2011809.137  ops/s  12600.809     {:size "10b"}
-jsonista.jmh/encode-data-json  :encode  :throughput  5         382677.707   ops/s  2861.142      {:size "100b"}
-jsonista.jmh/encode-data-json  :encode  :throughput  5         66403.631    ops/s  597.436       {:size "1k"}
-jsonista.jmh/encode-data-json  :encode  :throughput  5         5480.185     ops/s  58.379        {:size "10k"}
-jsonista.jmh/encode-data-json  :encode  :throughput  5         576.691      ops/s  15.682        {:size "100k"}
-jsonista.jmh/encode-cheshire   :encode  :throughput  5         996875.314   ops/s  5688.227      {:size "10b"}
-jsonista.jmh/encode-cheshire   :encode  :throughput  5         482130.613   ops/s  2685.181      {:size "100b"}
-jsonista.jmh/encode-cheshire   :encode  :throughput  5         128936.005   ops/s  879.709       {:size "1k"}
-jsonista.jmh/encode-cheshire   :encode  :throughput  5         12209.066    ops/s  94.285        {:size "10k"}
-jsonista.jmh/encode-cheshire   :encode  :throughput  5         1258.157     ops/s  12.340        {:size "100k"}
-jsonista.jmh/encode-jsonista   :encode  :throughput  5         6356105.348  ops/s  85360.100     {:size "10b"}
-jsonista.jmh/encode-jsonista   :encode  :throughput  5         2010379.039  ops/s  67648.165     {:size "100b"}
-jsonista.jmh/encode-jsonista   :encode  :throughput  5         409264.663   ops/s  3704.992      {:size "1k"}
-jsonista.jmh/encode-jsonista   :encode  :throughput  5         34527.245    ops/s  251.065       {:size "10k"}
-jsonista.jmh/encode-jsonista   :encode  :throughput  5         2934.595     ops/s  15.858        {:size "100k"}
-jsonista.jmh/encode-jackson    :encode  :throughput  5         6275467.563  ops/s  123578.482    {:size "10b"}
-jsonista.jmh/encode-jackson    :encode  :throughput  5         2092035.098  ops/s  11417.613     {:size "100b"}
-jsonista.jmh/encode-jackson    :encode  :throughput  5         408380.251   ops/s  10912.350     {:size "1k"}
-jsonista.jmh/encode-jackson    :encode  :throughput  5         31992.554    ops/s  230.781       {:size "10k"}
-jsonista.jmh/encode-jackson    :encode  :throughput  5         2887.485     ops/s  12.491        {:size "100k"}
-jsonista.jmh/decode-data-json  :decode  :throughput  5         2257552.949  ops/s  23890.443     {:size "10b"}
-jsonista.jmh/decode-data-json  :decode  :throughput  5         498261.935   ops/s  2348.572      {:size "100b"}
-jsonista.jmh/decode-data-json  :decode  :throughput  5         85191.855    ops/s  321.961       {:size "1k"}
-jsonista.jmh/decode-data-json  :decode  :throughput  5         7763.264     ops/s  250.502       {:size "10k"}
-jsonista.jmh/decode-data-json  :decode  :throughput  5         771.691      ops/s  6.559         {:size "100k"}
-jsonista.jmh/decode-cheshire   :decode  :throughput  5         1099821.870  ops/s  14796.659     {:size "10b"}
-jsonista.jmh/decode-cheshire   :decode  :throughput  5         544013.773   ops/s  4122.539      {:size "100b"}
-jsonista.jmh/decode-cheshire   :decode  :throughput  5         109517.975   ops/s  911.623       {:size "1k"}
-jsonista.jmh/decode-cheshire   :decode  :throughput  5         10017.553    ops/s  50.871        {:size "10k"}
-jsonista.jmh/decode-cheshire   :decode  :throughput  5         1014.003     ops/s  18.609        {:size "100k"}
-jsonista.jmh/decode-jsonista   :decode  :throughput  5         3476196.425  ops/s  21535.641     {:size "10b"}
-jsonista.jmh/decode-jsonista   :decode  :throughput  5         792773.466   ops/s  8209.591      {:size "100b"}
-jsonista.jmh/decode-jsonista   :decode  :throughput  5         160180.797   ops/s  554.940       {:size "1k"}
-jsonista.jmh/decode-jsonista   :decode  :throughput  5         14151.302    ops/s  107.906       {:size "10k"}
-jsonista.jmh/decode-jsonista   :decode  :throughput  5         1508.829     ops/s  5.855         {:size "100k"}
-jsonista.jmh/decode-jackson    :decode  :throughput  5         5145394.434  ops/s  84237.662     {:size "10b"}
-jsonista.jmh/decode-jackson    :decode  :throughput  5         1339393.911  ops/s  6660.176      {:size "100b"}
-jsonista.jmh/decode-jackson    :decode  :throughput  5         274465.912   ops/s  1589.614      {:size "1k"}
-jsonista.jmh/decode-jackson    :decode  :throughput  5         29607.044    ops/s  183.068       {:size "10k"}
-jsonista.jmh/decode-jackson    :decode  :throughput  5         2539.491     ops/s  17.753        {:size "100k"}
-```
+**encode** (string-keyed maps):
+
+|               | 10b | 100b | 1k | 10k | 100k |
+|---------------|----:|-----:|---:|----:|-----:|
+| data.json     | 5,917,892 | 1,421,856 | 210,328 | 16,047 | 1,647 |
+| cheshire      | 2,519,476 | 1,541,245 | 471,888 | 44,068 | 4,253 |
+| jsonista      | 9,287,998 | 3,481,862 | 716,087 | 57,715 | 5,528 |
+| Jackson (raw) | 9,376,698 | 3,523,568 | 655,584 | 55,877 | 5,534 |
+
+**decode** (string keys):
+
+|               | 10b | 100b | 1k | 10k | 100k |
+|---------------|----:|-----:|---:|----:|-----:|
+| data.json     | 8,481,497 | 2,108,504 | 346,346 | 27,968 | 2,602 |
+| cheshire      | 2,189,307 | 1,260,362 | 307,258 | 27,377 | 3,006 |
+| jsonista      | 9,031,389 | 2,411,301 | 420,738 | 37,290 | 3,759 |
+| Jackson (raw) | 8,448,628 | 2,406,312 | 441,294 | 40,911 | 4,254 |
+
+**encode, keyword keys** (`keyword-keys-object-mapper`; data.json writes
+keyword keys natively, cheshire likewise):
+
+|           | 10b | 100b | 1k | 10k | 100k |
+|-----------|----:|-----:|---:|----:|-----:|
+| data.json | 7,047,371 | 1,394,450 | 216,929 | 16,633 | 1,619 |
+| cheshire  | 2,156,053 | 1,489,408 | 415,399 | 39,578 | 4,270 |
+| jsonista  | 8,852,407 | 3,388,647 | 666,115 | 56,608 | 5,357 |
+
+**decode, keyword keys** (data.json with `:key-fn keyword`, cheshire with
+`(parse-string s true)`):
+
+|           | 10b | 100b | 1k | 10k | 100k |
+|-----------|----:|-----:|---:|----:|-----:|
+| data.json | 7,449,560 | 1,757,660 | 325,437 | 27,528 | 2,688 |
+| cheshire  | 2,106,946 | 1,102,503 | 268,505 | 24,393 | 2,570 |
+| jsonista  | 8,814,925 | 2,520,516 | 443,022 | 39,829 | 3,964 |
 
 ## Origin story
 

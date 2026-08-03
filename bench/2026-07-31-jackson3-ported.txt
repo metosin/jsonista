@@ -1,0 +1,1540 @@
+# Jackson 3 ported — jsonista 2.0.0-SNAPSHOT, jackson 3.1.5
+# Date: 2026-07-31T21:56:51Z
+# JDK: openjdk version "25.0.2" 2026-01-20 LTS
+# Machine: Apple Silicon macOS (Darwin 25.5.0)
+# Wall clock: 282s (baseline was 283s)
+#
+# Config — IDENTICAL to bench/2026-07-31-jackson2-baseline.txt:
+#   lein jmh '{:file "benchmarks.edn", :fork {:count 1 :warmups 0},
+#              :warmup {:iterations 1 :time [1 :s]},
+#              :measurement {:iterations 5 :time [1 :s]},
+#              :format [:table :pprint], :output ...}'
+#
+# Analysis: bench/2026-07-31-comparison.md
+# NOTE: reduced config, biased low by short warmup. NOT comparable to the
+# README's published :type :quick table.
+
+
+:benchmark                     :name    :mode        :samples  :score              :score-error  :params       
+-----------------------------  -------  -----------  --------  ------------------  ------------  --------------
+jsonista.jmh/encode-data-json  :encode  :throughput  5         7125406.657  ops/s  570262.748    {:size "10b"} 
+jsonista.jmh/encode-data-json  :encode  :throughput  5         1247076.184  ops/s  106420.227    {:size "100b"}
+jsonista.jmh/encode-data-json  :encode  :throughput  5         198811.671   ops/s  12081.410     {:size "1k"}  
+jsonista.jmh/encode-data-json  :encode  :throughput  5         15334.079    ops/s  689.673       {:size "10k"} 
+jsonista.jmh/encode-data-json  :encode  :throughput  5         1675.931     ops/s  37.634        {:size "100k"}
+jsonista.jmh/encode-cheshire   :encode  :throughput  5         2537566.052  ops/s  515832.994    {:size "10b"} 
+jsonista.jmh/encode-cheshire   :encode  :throughput  5         1642800.908  ops/s  60098.791     {:size "100b"}
+jsonista.jmh/encode-cheshire   :encode  :throughput  5         461807.193   ops/s  40255.291     {:size "1k"}  
+jsonista.jmh/encode-cheshire   :encode  :throughput  5         40422.682    ops/s  1064.674      {:size "10k"} 
+jsonista.jmh/encode-cheshire   :encode  :throughput  5         4312.544     ops/s  175.306       {:size "100k"}
+jsonista.jmh/encode-jsonista   :encode  :throughput  5         9223559.031  ops/s  184851.938    {:size "10b"} 
+jsonista.jmh/encode-jsonista   :encode  :throughput  5         3469695.987  ops/s  50789.245     {:size "100b"}
+jsonista.jmh/encode-jsonista   :encode  :throughput  5         642576.952   ops/s  29657.797     {:size "1k"}  
+jsonista.jmh/encode-jsonista   :encode  :throughput  5         56104.832    ops/s  388.000       {:size "10k"} 
+jsonista.jmh/encode-jsonista   :encode  :throughput  5         5483.182     ops/s  120.652       {:size "100k"}
+jsonista.jmh/encode-jackson    :encode  :throughput  5         9082574.954  ops/s  317967.801    {:size "10b"} 
+jsonista.jmh/encode-jackson    :encode  :throughput  5         3810812.872  ops/s  167875.222    {:size "100b"}
+jsonista.jmh/encode-jackson    :encode  :throughput  5         706696.076   ops/s  8050.878      {:size "1k"}  
+jsonista.jmh/encode-jackson    :encode  :throughput  5         57269.960    ops/s  6357.756      {:size "10k"} 
+jsonista.jmh/encode-jackson    :encode  :throughput  5         5524.463     ops/s  90.697        {:size "100k"}
+jsonista.jmh/decode-data-json  :decode  :throughput  5         8320387.584  ops/s  288216.388    {:size "10b"} 
+jsonista.jmh/decode-data-json  :decode  :throughput  5         2008229.648  ops/s  367885.534    {:size "100b"}
+jsonista.jmh/decode-data-json  :decode  :throughput  5         341008.778   ops/s  24714.646     {:size "1k"}  
+jsonista.jmh/decode-data-json  :decode  :throughput  5         26547.788    ops/s  1569.587      {:size "10k"} 
+jsonista.jmh/decode-data-json  :decode  :throughput  5         2456.885     ops/s  80.624        {:size "100k"}
+jsonista.jmh/decode-cheshire   :decode  :throughput  5         2119743.882  ops/s  65917.993     {:size "10b"} 
+jsonista.jmh/decode-cheshire   :decode  :throughput  5         1176389.481  ops/s  106826.403    {:size "100b"}
+jsonista.jmh/decode-cheshire   :decode  :throughput  5         301070.477   ops/s  23219.877     {:size "1k"}  
+jsonista.jmh/decode-cheshire   :decode  :throughput  5         27488.500    ops/s  713.240       {:size "10k"} 
+jsonista.jmh/decode-cheshire   :decode  :throughput  5         2852.505     ops/s  114.099       {:size "100k"}
+jsonista.jmh/decode-jsonista   :decode  :throughput  5         7501714.123  ops/s  399629.830    {:size "10b"} 
+jsonista.jmh/decode-jsonista   :decode  :throughput  5         1652347.325  ops/s  76484.086     {:size "100b"}
+jsonista.jmh/decode-jsonista   :decode  :throughput  5         336975.540   ops/s  12124.551     {:size "1k"}  
+jsonista.jmh/decode-jsonista   :decode  :throughput  5         33441.113    ops/s  1170.389      {:size "10k"} 
+jsonista.jmh/decode-jsonista   :decode  :throughput  5         3252.911     ops/s  78.045        {:size "100k"}
+jsonista.jmh/decode-jackson    :decode  :throughput  5         8579238.577  ops/s  430185.772    {:size "10b"} 
+jsonista.jmh/decode-jackson    :decode  :throughput  5         2424268.799  ops/s  93331.620     {:size "100b"}
+jsonista.jmh/decode-jackson    :decode  :throughput  5         436270.968   ops/s  19221.251     {:size "1k"}  
+jsonista.jmh/decode-jackson    :decode  :throughput  5         40538.867    ops/s  2017.905      {:size "10k"} 
+jsonista.jmh/decode-jackson    :decode  :throughput  5         4169.954     ops/s  66.502        {:size "100k"}
+
+({:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-data-json,
+  :score-error 570262.7477300101,
+  :index 0,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [7125406.656826252 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-data-json,
+  :score-error 106420.2269397844,
+  :index 0,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [1247076.184150997 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-data-json,
+  :score-error 12081.410160460522,
+  :index 0,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [198811.67118891203 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-data-json,
+  :score-error 689.6734798843961,
+  :index 0,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [15334.078960180404 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-data-json,
+  :score-error 37.63392155191328,
+  :index 0,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [1675.9312680434646 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-cheshire,
+  :score-error 515832.9939907569,
+  :index 1,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2537566.05208319 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-cheshire,
+  :score-error 60098.790740390075,
+  :index 1,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [1642800.9080659847 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-cheshire,
+  :score-error 40255.29144122046,
+  :index 1,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [461807.1926815019 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-cheshire,
+  :score-error 1064.6736555103112,
+  :index 1,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [40422.68222378502 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-cheshire,
+  :score-error 175.30625992048,
+  :index 1,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [4312.543960733833 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jsonista,
+  :score-error 184851.93848560765,
+  :index 2,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [9223559.03071349 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jsonista,
+  :score-error 50789.24467604275,
+  :index 2,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [3469695.987138233 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jsonista,
+  :score-error 29657.796786307386,
+  :index 2,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [642576.9517302833 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jsonista,
+  :score-error 387.9997411421174,
+  :index 2,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [56104.831892617905 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jsonista,
+  :score-error 120.65185312882625,
+  :index 2,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [5483.181514580678 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jackson,
+  :score-error 317967.80053823313,
+  :index 3,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [9082574.95435301 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jackson,
+  :score-error 167875.22249277018,
+  :index 3,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [3810812.8716100296 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jackson,
+  :score-error 8050.8784191371005,
+  :index 3,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [706696.0760449372 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jackson,
+  :score-error 6357.755712235131,
+  :index 3,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [57269.95951321114 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/edn),
+  :samples 5,
+  :fn jsonista.jmh/encode-jackson,
+  :score-error 90.6971127834313,
+  :index 3,
+  :ops-per-invocation 1,
+  :name :encode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [5524.463284647851 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-data-json,
+  :score-error 288216.3877557226,
+  :index 4,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [8320387.583739899 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-data-json,
+  :score-error 367885.5342481454,
+  :index 4,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2008229.6477123566 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-data-json,
+  :score-error 24714.646193382097,
+  :index 4,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [341008.77765008813 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-data-json,
+  :score-error 1569.5874854626018,
+  :index 4,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [26547.788464617526 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-data-json,
+  :score-error 80.62356208718232,
+  :index 4,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2456.884772091236 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-cheshire,
+  :score-error 65917.99348717902,
+  :index 5,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2119743.8821765985 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-cheshire,
+  :score-error 106826.4026697881,
+  :index 5,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [1176389.4813380302 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-cheshire,
+  :score-error 23219.876575434053,
+  :index 5,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [301070.47737187234 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-cheshire,
+  :score-error 713.2395180893656,
+  :index 5,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [27488.500412565576 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-cheshire,
+  :score-error 114.09886977311265,
+  :index 5,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2852.5046980702264 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jsonista,
+  :score-error 399629.8295371494,
+  :index 6,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [7501714.122891614 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jsonista,
+  :score-error 76484.08608932185,
+  :index 6,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [1652347.3253727187 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jsonista,
+  :score-error 12124.551458661575,
+  :index 6,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [336975.5396185266 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jsonista,
+  :score-error 1170.388575123541,
+  :index 6,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [33441.11254853689 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jsonista,
+  :score-error 78.04452521617739,
+  :index 6,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [3252.910815589129 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jackson,
+  :score-error 430185.7723358577,
+  :index 7,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [8579238.577043567 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jackson,
+  :score-error 93331.62010681548,
+  :index 7,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100b"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [2424268.7990694605 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jackson,
+  :score-error 19221.251148070987,
+  :index 7,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "1k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [436270.96812524664 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jackson,
+  :score-error 2017.9047994673663,
+  :index 7,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "10k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [40538.86733854272 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}}
+ {:args (:state/json),
+  :samples 5,
+  :fn jsonista.jmh/decode-jackson,
+  :score-error 66.50222824038123,
+  :index 7,
+  :ops-per-invocation 1,
+  :name :decode,
+  :mode :throughput,
+  :params {:size "100k"},
+  :output-time-unit :sec,
+  :measurement {:count 1, :iterations 5, :time [1 :sec]},
+  :score [4169.954269706448 "ops/s"],
+  :iterations {:synchronize true},
+  :warmup {:count 1, :iterations 1, :time [1 :sec]},
+  :timeout [10 :min],
+  :fork
+  {:count 1,
+   :warmups 0,
+   :jvm
+   {:java
+    "/Users/vincent.pizzo/.sdkman/candidates/java/25.0.2-amzn/bin/java",
+    :args
+    ["-Djava.net.preferIPv4Stack=true"
+     "-Dfile.encoding=UTF-8"
+     "-Dclojure.compiler.direct-linking=true"
+     "-Dclojure.compile.path=/Users/vincent.pizzo/Projects/jsonista/target/classes"
+     "-Djsonista.version=2.0.0-SNAPSHOT"
+     "-Dclojure.debug=false"
+     "-Dhttp.proxyHost=localhost"
+     "-Dhttp.proxyPort=58166"
+     "-Dhttp.nonProxyHosts=*localhost|*127.0.0.1|*::1|*169.254.0.0/16|*10.0.0.0/8|*172.16.0.0/12|*192.168.0.0/16"
+     "-Dhttps.proxyHost=localhost"
+     "-Dhttps.proxyPort=58166"
+     "-Dclojure.compiler.direct-linking=true"],
+    :jdk "25.0.2",
+    :jmh "1.32"}},
+  :thread-groups {}})

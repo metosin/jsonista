@@ -1,11 +1,9 @@
 package jsonista.jackson;
 
 import clojure.lang.Keyword;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 public class KeywordSerializer extends StdSerializer<Keyword> {
   private final boolean writeFieldName;
@@ -16,10 +14,10 @@ public class KeywordSerializer extends StdSerializer<Keyword> {
   }
 
   @Override
-  public void serialize(Keyword value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Keyword value, JsonGenerator gen, SerializationContext provider) {
     String text = value.sym.toString();
     if (writeFieldName) {
-      gen.writeFieldName(text);
+      gen.writeName(text);
     } else {
       gen.writeString(text);
     }

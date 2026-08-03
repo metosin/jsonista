@@ -1,0 +1,10 @@
+;; Isolates the decode cost of Jackson 3's FAIL_ON_TRAILING_TOKENS default.
+;; Separate from benchmarks.edn, which must stay byte-identical so the
+;; committed Jackson 2 / Jackson 3 comparison remains reproducible.
+{:benchmarks [{:name :decode
+               :ns jsonista.trailing-bench
+               :fn [decode-strict decode-lenient]
+               :args [:state/json]}]
+ :states {:json {:fn jsonista.trailing-bench/json-data, :args [:param/size]}}
+ :params {:size ["10b" "100b" "1k" "10k" "100k"]}
+ :options {:jmh/default {:fork {:jvm {:append-args ["-Dclojure.compiler.direct-linking=true"]}}}}}

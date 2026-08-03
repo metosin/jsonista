@@ -1,10 +1,9 @@
 (ns jsonista.tagged
   (:import (jsonista.jackson FunctionalSerializer TaggedValueOrPersistentVectorDeserializer)
-           (com.fasterxml.jackson.core JsonGenerator)
-           (com.fasterxml.jackson.databind.module SimpleModule)
+           (tools.jackson.core JsonGenerator)
+           (tools.jackson.databind.module SimpleModule)
            (clojure.lang Keyword)
-           (java.util List)
-           (com.fasterxml.jackson.databind ObjectMapper)))
+           (java.util List)))
 
 (defn ^FunctionalSerializer serializer [^String tag encoder]
   (FunctionalSerializer.
@@ -18,10 +17,9 @@
   (.writeString gen (.toString (.sym x))))
 
 (defn encode-collection [es ^JsonGenerator gen]
-  (let [mapper ^ObjectMapper (.getCodec gen)]
-    (.writeStartArray gen)
-    (doseq [e es] (.writeRawValue gen (.writeValueAsString mapper e)))
-    (.writeEndArray gen)))
+  (.writeStartArray gen)
+  (doseq [e es] (.writePOJO gen e))
+  (.writeEndArray gen))
 
 (defn encode-str [^Object o ^JsonGenerator gen]
   (.writeString gen (.toString o)))

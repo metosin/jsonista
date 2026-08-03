@@ -1,45 +1,43 @@
 package jsonista.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.*;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ArrayListDeserializer extends StdDeserializer<List<Object>> implements ContextualDeserializer {
+public class ArrayListDeserializer extends StdDeserializer<List<Object>> {
 
-  private JsonDeserializer<Object> _valueDeserializer;
+  private ValueDeserializer<Object> _valueDeserializer;
 
   public ArrayListDeserializer() {
     super(List.class);
   }
 
-  public ArrayListDeserializer(JsonDeserializer<Object> valueDeser) {
+  public ArrayListDeserializer(ValueDeserializer<Object> valueDeser) {
     this();
     _valueDeserializer = valueDeser;
   }
 
   @Override
-  public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty beanProperty) throws JsonMappingException {
+  public ValueDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty beanProperty) {
     JavaType object = ctxt.constructType(Object.class);
-    JsonDeserializer<Object> valueDeser = ctxt.findNonContextualValueDeserializer(object);
+    ValueDeserializer<Object> valueDeser = ctxt.findNonContextualValueDeserializer(object);
     return this.withResolved(valueDeser);
   }
 
-  private JsonDeserializer<List<Object>> withResolved(JsonDeserializer<Object> valueDeser) {
+  private ValueDeserializer<List<Object>> withResolved(ValueDeserializer<Object> valueDeser) {
     return this._valueDeserializer == valueDeser ? this : new ArrayListDeserializer(valueDeser);
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<Object> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+  public List<Object> deserialize(JsonParser p, DeserializationContext ctxt) {
     ArrayList<Object> list = new ArrayList<>();
 
-    JsonDeserializer<Object> deser = ctxt.findNonContextualValueDeserializer(ctxt.constructType(Object.class));
+    ValueDeserializer<Object> deser = ctxt.findNonContextualValueDeserializer(ctxt.constructType(Object.class));
     while (p.nextValue() != JsonToken.END_ARRAY) {
       list.add(deser.deserialize(p, ctxt));
     }

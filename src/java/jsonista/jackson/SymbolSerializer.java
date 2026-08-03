@@ -1,11 +1,9 @@
 package jsonista.jackson;
 
 import clojure.lang.Symbol;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 public class SymbolSerializer extends StdSerializer<Symbol> {
 
@@ -14,7 +12,7 @@ public class SymbolSerializer extends StdSerializer<Symbol> {
   }
 
   @Override
-  public void serialize(Symbol value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+  public void serialize(Symbol value, JsonGenerator gen, SerializationContext provider) {
     gen.writeString(value.toString());
   }
 }

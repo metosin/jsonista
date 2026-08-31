@@ -34,7 +34,7 @@
                                   [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
-             :1.11 {:dependencies [[org.clojure/clojure "1.12.5"]]}
+             :1.11 {:dependencies [[org.clojure/clojure "1.11.4" :upgrade false]]}
              :jmh {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"

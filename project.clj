@@ -17,24 +17,24 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.21.2"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.21.2"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.21.2"]]
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.12.4"]]}
-             :dev {:dependencies [[org.clojure/clojure "1.12.4"]
+  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.22.2"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.22.2"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.22.2"]]
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.12.5"]]}
+             :dev {:dependencies [[org.clojure/clojure "1.12.5"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.21.2"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.22.2"]
                                   [cheshire "6.2.0"]
-                                  [com.taoensso/nippy "3.6.0"]
+                                  [com.taoensso/nippy "3.8.1"]
                                   [org.clojure/data.json "2.5.2"]
-                                  [com.cognitect/transit-clj "1.1.357"]
-                                  [org.msgpack/msgpack-core "0.9.11"]
-                                  [org.msgpack/jackson-dataformat-msgpack "0.9.11"
+                                  [com.cognitect/transit-clj "1.1.363"]
+                                  [org.msgpack/msgpack-core "0.9.12"]
+                                  [org.msgpack/jackson-dataformat-msgpack "0.9.12"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
-                                  [com.clojure-goes-fast/clj-async-profiler "1.7.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
-             :1.11 {:dependencies [[org.clojure/clojure "1.11.3"]]}
+             :1.11 {:dependencies [[org.clojure/clojure "1.12.5"]]}
              :jmh {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"

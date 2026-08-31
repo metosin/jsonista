@@ -1,5 +1,6 @@
-## UNRELEASED
+## 1.0.1 (2026-08-31)
 
+* Speed up PersistentHashMapDeserializer [#92](https://github.com/metosin/jsonista/pull/92)
 * Updated deps:
 ```
 [com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.21.2"

@@ -1,3 +1,12 @@
+## UNRELEASED
+
+* Updated deps:
+```
+[com.fasterxml.jackson.core/jackson-core "2.22.2"] is available but we use "2.21.2"
+[com.fasterxml.jackson.core/jackson-databind "2.22.2"] is available but we use "2.21.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.22.2"] is available but we use "2.21.2"
+```
+
 ## 1.0.0 (2026-03-06)
 
 * Jsonista has been fairly stable for a couple of years now. Let's call this 1.0!

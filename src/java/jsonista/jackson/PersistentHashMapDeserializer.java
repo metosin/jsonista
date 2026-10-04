@@ -58,18 +58,21 @@ public class PersistentHashMapDeserializer extends StdDeserializer<Map<String, O
       entries[size * 2 + 1] = value;
       size++;
     }
+    if (p.nextToken() == JsonToken.END_OBJECT) {
+      return (Map<String, Object>) PersistentArrayMap.createAsIfByAssoc(entries);
+    }
 
     // Phase 2: overflow into a PersistentHashMap
     ITransientMap t = PersistentHashMap.EMPTY.asTransient();
     for (int i = 0; i < 16; i += 2) {
       t = t.assoc(entries[i], entries[i + 1]);
     }
-    while (p.nextToken() != JsonToken.END_OBJECT) {
+    do {
       Object key = _keyDeserializer.deserializeKey(p.getCurrentName(), ctxt);
       p.nextToken();
       Object value = _valueDeserializer.deserialize(p, ctxt);
       t = t.assoc(key, value);
-    }
+    } while (p.nextToken() != JsonToken.END_OBJECT);
     return (Map<String, Object>) t.persistent();
   }
 }

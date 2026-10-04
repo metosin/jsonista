@@ -4,7 +4,8 @@
             [cheshire.core :as cheshire]
             [cheshire.generate :as generate]
             [clojure.string :as str])
-  (:import (java.util UUID Date)
+  (:import (clojure.lang PersistentArrayMap PersistentHashMap)
+           (java.util UUID Date)
            (java.sql Timestamp)
            (com.fasterxml.jackson.core JsonGenerator)
            (java.io ByteArrayInputStream InputStreamReader File FileOutputStream RandomAccessFile FileWriter)
@@ -389,3 +390,8 @@
     (force d2)
     (is (= "{\"realized\":true}" (j/write-value-as-string d)))
     (is (= "{\"realized\":true}" (j/write-value-as-string d2)))))
+
+(deftest map-types-test
+  (let [json-object (fn [n] (str "{" (str/join "," (map #(str "\"k" % "\":" %) (range n))) "}"))]
+    (is (= [PersistentArrayMap PersistentArrayMap PersistentArrayMap PersistentHashMap]
+           (map #(class (j/read-value (json-object %))) [0 7 8 9])))))

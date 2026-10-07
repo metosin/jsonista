@@ -1,3 +1,13 @@
+## 1.0.2 (2026-10-07)
+
+* Return array map for objects with exactly 8 keys [#97](https://github.com/metosin/jsonista/pull/97)
+* Updated deps:
+```
+[com.fasterxml.jackson.core/jackson-core "2.22.3"] is available but we use "2.22.2"
+[com.fasterxml.jackson.core/jackson-databind "2.22.3"] is available but we use "2.22.2"
+[com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.22.3"] is available but we use "2.22.2"
+```
+
 ## 1.0.1 (2026-08-31)
 
 * Speed up PersistentHashMapDeserializer [#92](https://github.com/metosin/jsonista/pull/92)

@@ -35,10 +35,11 @@
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :1.11 {:dependencies [[org.clojure/clojure "1.11.4" :upgrade false]]}
+             :1.13 {:dependencies [[org.clojure/clojure "1.13.0-alpha7" :upgrade false]]}
              :jmh {:jvm-opts ["-Dclojure.compiler.direct-linking=true"]}
              :perf {:jvm-opts ^:replace ["-server"
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}
-  :aliases {"all" ["with-profile" "default:dev:default:dev,1.11"]
+  :aliases {"all" ["with-profile" "default:dev:dev,1.11:dev,1.13"]
             "perf" ["with-profile" "default,dev,perf"]
             "repl" ["with-profile" "default,dev" "repl"]})

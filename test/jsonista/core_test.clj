@@ -75,7 +75,7 @@
                         :double (double 1.2)
                         :float (float 3.14)
                         :big-integer (biginteger 3)
-                        :big-decimal (bigdec 4)
+                        :big-decimal (bigdec 4.5)
                         :ratio 3/4
                         :short (short 5)
                         :byte (byte 6)
@@ -104,7 +104,7 @@
                             :double 1.2
                             :float 3.14
                             :big-integer 3
-                            :big-decimal 4
+                            :big-decimal 4.5
                             :ratio 0.75
                             :short 5
                             :byte 6

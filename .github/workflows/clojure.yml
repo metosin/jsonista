@@ -40,3 +40,17 @@ jobs:
         lein: 2.12.0
     - name: Run tests
       run: lein do clean, all test, all check
+
+  lint:
+    name: clj-kondo
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup clj-kondo
+      uses: DeLaGuardo/setup-clojure@13.7.0
+      with:
+        clj-kondo: 2026.10.26
+    - name: Lint
+      run: clj-kondo --lint src test

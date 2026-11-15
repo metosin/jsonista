@@ -79,11 +79,11 @@
    (java.util Iterator List Map Date)
    (clojure.lang Delay Keyword Ratio Symbol)))
 
-(defn- ^Module clojure-module
+(defn- clojure-module
   "Create a Jackson Databind module to support Clojure datastructures.
 
   See [[object-mapper]] docstring for the documentation of the options."
-  [{:keys [encode-key-fn decode-key-fn encoders date-format]
+  ^Module [{:keys [encode-key-fn decode-key-fn encoders date-format]
     :or {encode-key-fn true, decode-key-fn false}}]
   (doto (SimpleModule. "Clojure")
     (.addDeserializer List (PersistentVectorDeserializer.))
@@ -109,14 +109,14 @@
      (true? encode-key-fn) (.addKeySerializer Keyword (KeywordSerializer. true))
      (fn? encode-key-fn) (.addKeySerializer Keyword (FunctionalKeywordSerializer. encode-key-fn)))))
 
-(defn ^:no-doc ^Module java-collection-module
+(defn ^:no-doc java-collection-module
   "Create a Jackson Databind module to support Java HashMap and ArrayList."
-  []
+  ^Module []
   (doto (SimpleModule. "JavaCollectionModule")
     (.addDeserializer List (ArrayListDeserializer.))
     (.addDeserializer Map (HashMapDeserializer.))))
 
-(defn ^ObjectMapper object-mapper
+(defn object-mapper
   "Create an ObjectMapper with Clojure support.
 
   The optional first parameter is a map of options. The following options are
@@ -149,8 +149,8 @@
   | ------------------- | -------------------------------------------------------------- |
   | `:decode-key-fn`    | true to coerce keys to keywords, false to leave them as strings, or a function to provide custom coercion (default: false) |
   | `:bigdecimals`      | true to decode doubles as BigDecimals (default: false) |"
-  ([] (object-mapper {}))
-  ([options]
+  (^ObjectMapper [] (object-mapper {}))
+  (^ObjectMapper [options]
    (let [factory (:factory options)
          maybe-mapper (:mapper options)
          base-mapper (cond
@@ -195,6 +195,8 @@
 
 (extend-protocol ReadValue
 
+  ;; `byte/1` style array class symbols need Clojure 1.12
+  #_{:clj-kondo/ignore [:syntax]}
   (Class/forName "[B")
   (-read-value [this ^ObjectMapper mapper]
     (.readValue mapper ^bytes this ^Class Object))
@@ -227,6 +229,8 @@
 
 (extend-protocol ReadValues
 
+  ;; `byte/1` style array class symbols need Clojure 1.12
+  #_{:clj-kondo/ignore [:syntax]}
   (Class/forName "[B")
   (-read-values [this ^ObjectMapper mapper]
     (.readValues (.readerFor mapper ^Class Object) ^bytes this))
@@ -279,6 +283,8 @@
 
 (extend-protocol WriteAll
 
+  ;; `byte/1` style array class symbols need Clojure 1.12
+  #_{:clj-kondo/ignore [:syntax :unresolved-protocol-method]}
   (Class/forName "[Ljava.lang.Object;")
   (-write-all [this ^SequenceWriter w]
     (.writeAll w ^"[Ljava.lang.Object;" this))
@@ -350,16 +356,16 @@
   ([object ^ObjectMapper mapper]
    (-read-value object mapper)))
 
-(defn ^String write-value-as-string
+(defn write-value-as-string
   "Encode a value as a JSON string.
 
   To configure, pass in an ObjectMapper created with [[object-mapper]].
 
   Throws the same exceptions as ObjectMapper.writeValueAsString():
     com.fasterxml.jackson.core.JsonProcessingException"
-  ([object]
+  (^String [object]
    (.writeValueAsString default-object-mapper object))
-  ([object ^ObjectMapper mapper]
+  (^String [object ^ObjectMapper mapper]
    (.writeValueAsString mapper object)))
 
 (defn write-value-as-bytes
@@ -396,11 +402,11 @@
   (when iterator
     (reify
       Iterable
-      (iterator [this] iterator)
+      (iterator [_] iterator)
       Iterator
-      (hasNext [this] (.hasNext iterator))
-      (next [this] (.next iterator))
-      (remove [this] (.remove iterator))
+      (hasNext [_] (.hasNext iterator))
+      (next [_] (.next iterator))
+      (remove [_] (.remove iterator))
       clojure.lang.IReduceInit
       (reduce [_ f val]
         (loop [ret val]

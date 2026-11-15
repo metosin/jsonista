@@ -86,7 +86,7 @@
               :keyword :keyword
               :q-keyword :qualified/:keyword
               :set #{1 2 3}
-              :queue (conj (clojure.lang.PersistentQueue/EMPTY) 1 2 3)
+              :queue (conj clojure.lang.PersistentQueue/EMPTY 1 2 3)
               :list (list 1 2 3)
               :bytes (.getBytes "bytes")
               :uuid (UUID/fromString "fbe5a1e8-6c91-42f6-8147-6cde3188fd25")

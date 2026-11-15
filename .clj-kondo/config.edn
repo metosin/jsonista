@@ -1,0 +1,3 @@
+{:linters
+ {;; -write-values* expands to (. ~method ~this) with a Java method name.
+  :unresolved-symbol {:exclude [(jsonista.core/-write-values* [writeValues writeValuesAsArray])]}}}

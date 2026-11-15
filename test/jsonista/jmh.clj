@@ -48,5 +48,5 @@
                             {:handlers {Keyword {:tag "!k"
                                                  :encode jt/encode-keyword
                                                  :decode keyword}}})]})]
-  (defn encode-jsonista [x] (j/write-value-as-string x mapper))
-  (defn decode-jsonista [x] (j/read-value x mapper)))
+  (defn encode-jsonista-tagged [x] (j/write-value-as-string x mapper))
+  (defn decode-jsonista-tagged [x] (j/read-value x mapper)))

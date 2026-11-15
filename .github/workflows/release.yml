@@ -20,7 +20,7 @@ jobs:
       with:
         lein: 2.12.0
     - name: Run tests
-      run: lein do clean, all test, all check
+      run: lein do clean, all-release test, all-release check
     - name: Build jar
       run: lein jar
     - name: Deploy to Clojars

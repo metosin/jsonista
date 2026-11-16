@@ -1,7 +1,6 @@
 (ns jsonista.json-perf-test
   (:require [criterium.core :as cc]
-            [clojure.test :refer :all]
-            [jsonista.test-utils :refer :all]
+            [jsonista.test-utils :refer [title]]
             [jsonista.core :as j]
             [cheshire.core :as cheshire]
             [cognitect.transit :as transit]
@@ -76,7 +75,7 @@
   "drops extra keys from data to test PAM vs PHM differences"
   [data]
   (cond-> data
-          (data "results") (update data "results" (partial map #(dissoc % "picture" "login" "cell" "dob" "email" "gender" "registered")))))
+          (data "results") (update "results" (partial map #(dissoc % "picture" "login" "cell" "dob" "email" "gender" "registered")))))
 
 (defn encode-perf-different-sizes []
   (doseq [file ["dev-resources/json10b.json"

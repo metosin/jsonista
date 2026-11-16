@@ -6,7 +6,7 @@
            (java.util List)
            (com.fasterxml.jackson.databind ObjectMapper)))
 
-(defn ^FunctionalSerializer serializer [^String tag encoder]
+(defn serializer ^FunctionalSerializer [^String tag encoder]
   (FunctionalSerializer.
     (fn [value ^JsonGenerator gen]
       (.writeStartArray gen)

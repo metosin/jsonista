@@ -41,5 +41,8 @@
                                          "-Xmx4096m"
                                          "-Dclojure.compiler.direct-linking=true"]}}
   :aliases {"all" ["with-profile" "default:dev:dev,1.11:dev,1.13"]
+            ;; Used by the release workflow, which builds on Java 8.
+            ;; Clojure 1.13 requires Java 17, so it's tested only in the test workflow.
+            "all-release" ["with-profile" "default:dev:dev,1.11"]
             "perf" ["with-profile" "default,dev,perf"]
             "repl" ["with-profile" "default,dev" "repl"]})

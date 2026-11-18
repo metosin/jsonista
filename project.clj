@@ -7,7 +7,7 @@
   :resource-paths ["resources"]
   :javac-options ["-Xlint:unchecked" "-target" "1.8" "-source" "1.8"]
   :java-source-paths ["src/java"]
-  :plugins [[lein-ancient "1.0.0-RC3"]
+  :plugins [[lein-ancient "1.0.0"]
             [lein-codox "0.10.8"]
             [lein-jmh "0.3.0"]]
   :deploy-repositories [["releases" {:url "https://repo.clojars.org/"
@@ -17,21 +17,21 @@
   :codox {:source-uri "http://github.com/metosin/jsonista/blob/master/{filepath}#L{line}"
           :output-path "doc"
           :metadata {:doc/format :markdown}}
-  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.22.3"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.22.3"]
-                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.22.3"]]
-  :profiles {:provided {:dependencies [[org.clojure/clojure "1.12.5"]]}
-             :dev {:dependencies [[org.clojure/clojure "1.12.5"]
+  :dependencies [[com.fasterxml.jackson.core/jackson-core "2.23.0"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.23.0"]
+                 [com.fasterxml.jackson.datatype/jackson-datatype-jsr310 "2.23.0"]]
+  :profiles {:provided {:dependencies [[org.clojure/clojure "1.12.6"]]}
+             :dev {:dependencies [[org.clojure/clojure "1.12.6"]
                                   [jmh-clojure/jmh-clojure "0.4.1"]
-                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.22.3"]
-                                  [cheshire "6.2.0"]
-                                  [com.taoensso/nippy "3.8.1"]
+                                  [com.fasterxml.jackson.datatype/jackson-datatype-joda "2.23.0"]
+                                  [cheshire "6.2.1"]
+                                  [com.taoensso/nippy "3.9.0"]
                                   [org.clojure/data.json "2.5.2"]
-                                  [com.cognitect/transit-clj "1.1.363"]
+                                  [com.cognitect/transit-clj "1.2.372"]
                                   [org.msgpack/msgpack-core "0.9.12"]
                                   [org.msgpack/jackson-dataformat-msgpack "0.9.12"
                                    :exclusions [com.fasterxml.jackson.core/jackson-databind]]
-                                  [com.clojure-goes-fast/clj-async-profiler "1.8.0"]
+                                  [com.clojure-goes-fast/clj-async-profiler "1.9.0"]
                                   [criterium "0.4.6"]]
                    :global-vars {*warn-on-reflection* true}}
              :1.11 {:dependencies [[org.clojure/clojure "1.11.4" :upgrade false]]}

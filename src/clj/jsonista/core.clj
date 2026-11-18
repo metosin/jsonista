@@ -128,6 +128,10 @@
   | `:factory`          | A Jackson JsonFactory for this given mapper                |
   | `:mapper`           | The base ObjectMapper to start with - overrides `:factory` |
 
+  A `JavaTimeModule` is registered by default. A `JavaTimeModule` given in
+  `:modules` (or already registered on `:mapper`) is used instead of it, e.g.
+  to enable `JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS`.
+
   | Encoding options              |                                                                                                                                   |
   |-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
   | `:order-by-keys`              | set to true to order map keys alphabetically                                                                                      |
@@ -136,7 +140,7 @@
   | `:strip-nils`                 | remove any keys that have nil values                                                                                              |
   | `:strip-empties`              | remove any keys that have nil or empty (\"\", {}, [], etc) values                                                                 |
   | `:do-not-fail-on-empty-beans` | serialize objects with no accessors as empty objects instead of throwing an exception                                             |
-  | `:date-format`                | string for custom date formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`                                                            |
+  | `:date-format`                | string for custom `java.util.Date` formatting. default: `yyyy-MM-dd'T'HH:mm:ss'Z'`, with milliseconds: `yyyy-MM-dd'T'HH:mm:ss.SSSX` |
   | `:encode-key-fn`              | true to coerce keyword keys to strings, false to leave them as keywords, or a function to provide custom coercion (default: true) |
   | `:encoders`                   | a map of custom encoders where keys should be types and values should be encoder functions                                        |
   | `:close`                      | close OutputStreams & other closeable targets after write-value (default: true) |
@@ -153,12 +157,17 @@
   (^ObjectMapper [options]
    (let [factory (:factory options)
          maybe-mapper (:mapper options)
+         modules (:modules options)
+         ;; A JavaTimeModule given in :modules replaces the default one, as
+         ;; Jackson ignores a second registration of the same module.
+         java-time-module (or (some #(when (instance? JavaTimeModule %) %) modules)
+                              (JavaTimeModule.))
          base-mapper (cond
                        maybe-mapper maybe-mapper
                        factory (ObjectMapper. ^JsonFactory factory)
                        :else (ObjectMapper.))
          mapper (doto ^ObjectMapper base-mapper
-                  (.registerModule (JavaTimeModule.))
+                  (.registerModule ^Module java-time-module)
                   (.registerModule (clojure-module options))
                   (cond->
                    (:order-by-keys options) (.configure SerializationFeature/ORDER_MAP_ENTRIES_BY_KEYS true)
@@ -169,7 +178,8 @@
                    (:do-not-fail-on-empty-beans options) (.disable SerializationFeature/FAIL_ON_EMPTY_BEANS)
                    (:escape-non-ascii options) (doto (-> .getFactory (.enable JsonGenerator$Feature/ESCAPE_NON_ASCII)))
                    (contains? options :close) (.configure JsonGenerator$Feature/AUTO_CLOSE_TARGET (boolean (:close options)))))]
-     (doseq [module (:modules options)]
+     (doseq [module modules
+             :when (not (identical? module java-time-module))]
        (.registerModule mapper module))
      (.disable mapper SerializationFeature/WRITE_DATES_AS_TIMESTAMPS)
      mapper)))

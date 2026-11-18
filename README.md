@@ -110,6 +110,33 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 ; "\"1970-01-01\""
 ```
 
+Dates and times: `java.time` values are encoded with Jackson's
+[`JavaTimeModule`](https://github.com/FasterXML/jackson-modules-java8/tree/2.x/datetime),
+which writes only as many fractional-second digits as needed
+(`"2026-11-18T10:19:44Z"`, `"2026-11-18T10:19:44.1"`). To configure it, pass
+your own `JavaTimeModule` in `:modules`; it replaces the default one.
+
+```clj
+(import '[com.fasterxml.jackson.datatype.jsr310 JavaTimeModule JavaTimeFeature])
+
+(def mapper
+  (j/object-mapper
+    {:modules [(-> (JavaTimeModule.)
+                   (.enable JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS))]}))
+
+(j/write-value-as-string (java.time.Instant/parse "2026-11-18T10:19:44Z") mapper)
+; "\"2026-11-18T10:19:44.000Z\""
+```
+
+`java.util.Date` values are encoded with the `:date-format` option (default
+`yyyy-MM-dd'T'HH:mm:ss'Z'`, without milliseconds). To include milliseconds:
+
+```clj
+(j/write-value-as-string (java.util.Date. 0)
+  (j/object-mapper {:date-format "yyyy-MM-dd'T'HH:mm:ss.SSSX"}))
+; "\"1970-01-01T00:00:00.000Z\""
+```
+
 ### Tagged JSON
 
 Adding support for lossless encoding data using tagged values. This

@@ -1,6 +1,6 @@
 ## Unreleased
 
-* A `JavaTimeModule` given in `:modules` now replaces the default one instead of being silently ignored, so it can be configured, e.g. with `JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS`. Document date formatting with milliseconds. [#43](https://github.com/metosin/jsonista/issues/43)
+* A `JavaTimeModule` in `:modules` now replaces the default one, so it can be configured. Document `:date-format` with milliseconds. [#43](https://github.com/metosin/jsonista/issues/43)
 * Updated deps:
 ```
 [com.fasterxml.jackson.core/jackson-core "2.23.0"] is available but we use "2.22.3"

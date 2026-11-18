@@ -112,9 +112,10 @@ Adding support for [joda-time](http://www.joda.org/joda-time) Classes, used by [
 
 Dates and times: `java.time` values are encoded with Jackson's
 [`JavaTimeModule`](https://github.com/FasterXML/jackson-modules-java8/tree/2.x/datetime),
-which writes only as many fractional-second digits as needed
-(`"2026-11-18T10:19:44Z"`, `"2026-11-18T10:19:44.1"`). To configure it, pass
-your own `JavaTimeModule` in `:modules`; it replaces the default one.
+which leaves out fractional seconds that are zero: an `Instant` on a whole
+second is written as `"2026-11-18T10:19:44Z"`, and a `LocalDateTime` with
+100 ms as `"2026-11-18T10:19:44.1"`. To configure it, pass your own
+`JavaTimeModule` in `:modules`; it replaces the default one.
 
 ```clj
 (import '[com.fasterxml.jackson.datatype.jsr310 JavaTimeModule JavaTimeFeature])

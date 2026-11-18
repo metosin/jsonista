@@ -129,8 +129,10 @@
   | `:mapper`           | The base ObjectMapper to start with - overrides `:factory` |
 
   A `JavaTimeModule` is registered by default. A `JavaTimeModule` given in
-  `:modules` (or already registered on `:mapper`) is used instead of it, e.g.
-  to enable `JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS`.
+  `:modules` is used instead of it, e.g. to enable
+  `JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS`. If `:mapper` already has a
+  `JavaTimeModule` registered, that one is used, and only the first one in
+  `:modules` counts.
 
   | Encoding options              |                                                                                                                                   |
   |-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|

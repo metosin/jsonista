@@ -13,6 +13,8 @@
            (clojure.lang Keyword ExceptionInfo)
            (java.time Instant LocalTime LocalDateTime ZoneOffset)
            (com.fasterxml.jackson.datatype.joda JodaModule)
+           (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule JavaTimeFeature)
+           (com.fasterxml.jackson.databind ObjectMapper)
            (org.joda.time LocalDate DateTimeZone)
            (org.msgpack.jackson.dataformat MessagePackFactory)))
 
@@ -67,7 +69,27 @@
     (testing ":escape-non-ascii"
       (is (= "{\"imperial-money\":\"\\u00A3\"}" (j/write-value-as-string {:imperial-money "£"} (j/object-mapper {:escape-non-ascii true})))))
     (testing ":date-format"
-      (is (= "{\"mmddyyyy\":\"00-01-70\"}" (j/write-value-as-string {:mmddyyyy (Date. 0)} (j/object-mapper {:date-format "mm-dd-yy"})))))))
+      (is (= "{\"mmddyyyy\":\"00-01-70\"}" (j/write-value-as-string {:mmddyyyy (Date. 0)} (j/object-mapper {:date-format "mm-dd-yy"}))))
+      (testing "with milliseconds"
+        (is (= "\"1970-01-01T00:00:00.000Z\"" (j/write-value-as-string (Date. 0) (j/object-mapper {:date-format "yyyy-MM-dd'T'HH:mm:ss.SSSX"}))))))))
+
+(deftest java-time-module-test
+  (let [data [(Instant/parse "2026-11-18T10:19:44Z")
+              (LocalDateTime/parse "2026-11-18T10:19:44.100")]
+        subsecond-module #(.enable (JavaTimeModule.) JavaTimeFeature/ALWAYS_WRITE_SUBSECOND_DIGITS)]
+    (testing "default JavaTimeModule"
+      (is (= "[\"2026-11-18T10:19:44Z\",\"2026-11-18T10:19:44.1\"]"
+             (j/write-value-as-string data))))
+    (testing "JavaTimeModule in :modules replaces the default one"
+      (is (= "[\"2026-11-18T10:19:44.000Z\",\"2026-11-18T10:19:44.100\"]"
+             (j/write-value-as-string data (j/object-mapper {:modules [(subsecond-module)]})))))
+    (testing "JavaTimeModule registered on :mapper is kept"
+      (is (= "[\"2026-11-18T10:19:44.000Z\",\"2026-11-18T10:19:44.100\"]"
+             (j/write-value-as-string data (j/object-mapper {:mapper (doto (ObjectMapper.) (.registerModule (subsecond-module)))})))))
+    (testing "other options still apply"
+      (is (= "{\"t\":\"2026-11-18T10:19:44.000Z\",\"d\":\"1970-01-01T00:00:00Z\"}"
+             (j/write-value-as-string {:t (first data) :d (Date. 0)}
+                                      (j/object-mapper {:modules [(subsecond-module)]})))))))
 
 (deftest roundrobin-tests
   (let [data {:numbers {:integer (int 1)

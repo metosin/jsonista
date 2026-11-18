@@ -1,5 +1,6 @@
 ## Unreleased
 
+* A `JavaTimeModule` in `:modules` now replaces the default one, so it can be configured. Document `:date-format` with milliseconds. [#43](https://github.com/metosin/jsonista/issues/43)
 * Updated deps:
 ```
 [com.fasterxml.jackson.core/jackson-core "2.23.0"] is available but we use "2.22.3"
